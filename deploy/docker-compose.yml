@@ -1,0 +1,7 @@
+# Stub — implementation on Day 13
+version: "3.9"
+services:
+  mosaic:
+    build: .
+    ports:
+      - "8000:8000"

@@ -1,0 +1,48 @@
+# Mosaic Target Schema — canonical product master fields
+# All markets map to these fields via ATLAS
+
+fields:
+  - name: sku_id
+    type: string
+    description: Unique product identifier in the target system
+    required: true
+
+  - name: product_name
+    type: string
+    description: Canonical English product name
+    required: true
+
+  - name: brand
+    type: string
+    description: Brand name
+    required: true
+
+  - name: size_ml
+    type: float
+    description: Product size in millilitres
+    required: false
+
+  - name: weight_g
+    type: float
+    description: Product weight in grams
+    required: false
+
+  - name: category
+    type: string
+    description: Standardised category path (e.g. Personal Care > Body Wash)
+    required: true
+
+  - name: allergens
+    type: list[string]
+    description: List of allergen tags per regulatory standard
+    required: false
+
+  - name: barcode
+    type: string
+    description: EAN-13 or UPC barcode
+    required: false
+
+  - name: launch_date
+    type: date
+    description: Product launch date in ISO 8601 format (YYYY-MM-DD)
+    required: false
