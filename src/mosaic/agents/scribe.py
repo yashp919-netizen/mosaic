@@ -56,6 +56,9 @@ def generate_lineage(
     # Find the source column that maps to sku_id
     sku_source_col = field_lineage.get("sku_id")
 
+    # Strip "market_" prefix once so IDs read MSC-UK-000000 not MSC-MARKET_UK-000000
+    short_market = market_id.split("_", 1)[1] if market_id.startswith("market_") else market_id
+
     now = datetime.datetime.utcnow()
     records: list[LineageRecord] = []
 
@@ -66,7 +69,7 @@ def generate_lineage(
         else:
             source_sku_id = f"unknown-{row_index}"
 
-        target_sku_id = f"MSC-{market_id.upper()}-{int(row_index):06d}"
+        target_sku_id = f"MSC-{short_market.upper()}-{int(row_index):06d}"
 
         record = LineageRecord(
             source_sku_id=source_sku_id,

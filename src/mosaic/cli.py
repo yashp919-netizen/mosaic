@@ -273,7 +273,7 @@ def _prompt_decision(
 
 
 def cmd_run(args: argparse.Namespace) -> None:
-    """Full pipeline: Scout → Atlas → human review (if needed) → finalize."""
+    """Full pipeline: Scout → Atlas → human review (if needed) → finalize → Scribe."""
     import uuid
     from rich.console import Console
     from rich.table import Table
@@ -303,6 +303,9 @@ def cmd_run(args: argparse.Namespace) -> None:
         "pending_human_review": [],
         "human_decisions": {},
         "final_mappings": [],
+        "lineage_path": "",
+        "summary_path": "",
+        "executive_summary": "",
         "agent_log": [],
     }
 
@@ -383,6 +386,37 @@ def cmd_run(args: argparse.Namespace) -> None:
         )
 
     console.print(tbl)
+
+    # ---- Lineage preview ----
+    lineage_path = result.get("lineage_path", "")
+    if lineage_path:
+        from pathlib import Path as _Path
+        lp = _Path(lineage_path)
+        if lp.exists():
+            lines = lp.read_text(encoding="utf-8").splitlines()
+            preview = "\n".join(lines[:3])
+            console.print(
+                Panel(
+                    f"[dim]{preview}[/dim]",
+                    title=f"[bold blue]SCRIBE — Lineage Preview (first 3 of {len(lines)} records)[/bold blue]",
+                    expand=False,
+                )
+            )
+            console.print(f"[dim]Full lineage:[/dim] {lp}")
+
+    # ---- Executive summary ----
+    executive_summary = result.get("executive_summary", "")
+    summary_path = result.get("summary_path", "")
+    if executive_summary:
+        console.print(
+            Panel(
+                executive_summary,
+                title="[bold blue]SCRIBE — Executive Summary[/bold blue]",
+                expand=False,
+            )
+        )
+    if summary_path:
+        console.print(f"[dim]Summary saved:[/dim] {summary_path}")
 
     # Agent log
     if args.verbose:

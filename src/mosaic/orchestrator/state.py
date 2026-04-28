@@ -38,5 +38,10 @@ class MosaicState(TypedDict):
     # Final merged output after human review
     final_mappings: list[MappingProposal]
 
+    # SCRIBE output
+    lineage_path: str     # path to the persisted lineage_{market}.jsonl
+    summary_path: str     # path to the persisted summary_{market}.md
+    executive_summary: str  # raw summary text (also in the .md file)
+
     # Audit trail — each agent appends a short message
     agent_log: list[str]

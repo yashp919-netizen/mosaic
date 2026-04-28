@@ -16,8 +16,11 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
 from langgraph.types import interrupt
 
+import pandas as pd
+
 from mosaic.agents.atlas import load_target_schema, propose_mappings
 from mosaic.agents.scout import profile_market
+from mosaic.agents.scribe import generate_lineage, generate_summary, persist_lineage, persist_summary
 from mosaic.orchestrator.state import MosaicState
 from mosaic.schemas import MappingProposal
 
@@ -90,6 +93,66 @@ def human_review_node(state: MosaicState) -> dict[str, Any]:
 
     return {
         "human_decisions": decisions,
+        "agent_log": state.get("agent_log", []) + [log_entry],
+    }
+
+
+def scribe_node(state: MosaicState) -> dict[str, Any]:
+    """Generate per-row lineage records and an executive summary.
+
+    Re-reads the source CSV from csv_path rather than carrying a DataFrame in
+    state — DataFrames are not checkpointer-serializable.
+    """
+    csv_path = Path(state["csv_path"])
+    market_id = state["market_id"]
+
+    # BR market uses semicolons; UK and IN use commas
+    sep = ";" if market_id == "market_br" else ","
+    source_df = pd.read_csv(csv_path, sep=sep, low_memory=False)
+
+    # Persist lineage
+    project_root = Path(__file__).parent.parent.parent.parent
+    synth_dir = project_root / "data" / "synth"
+    short_market = market_id.split("_", 1)[1] if "_" in market_id else market_id
+
+    records = generate_lineage(state, source_df)
+    lineage_path = persist_lineage(records, synth_dir, short_market)
+
+    # Executive summary — try LLM, fall back to structured plain text
+    executive_summary = ""
+    try:
+        from mosaic.llm.factory import get_llm
+        llm_client = get_llm("ollama")
+        executive_summary = generate_summary(state, records, llm_client)
+    except Exception:
+        # LLM unavailable — build a minimal plain-text summary from the run data
+        proposals = state.get("proposals", [])
+        final = state.get("final_mappings", [])
+        hd = state.get("human_decisions", {})
+        auto = len(proposals) - len(hd)
+        reviewed = sum(1 for v in hd.values() if v is not None)
+        rejected = sum(1 for v in hd.values() if v is None)
+        executive_summary = (
+            f"Mosaic pipeline completed for market {short_market.upper()}. "
+            f"{len(source_df):,} source rows processed across {len(proposals)} columns. "
+            f"{auto} columns mapped automatically, {reviewed} required human review, "
+            f"{rejected} were rejected. "
+            f"{len(final)} final mappings produced. "
+            f"(LLM summary unavailable — Ollama not reachable at generation time.)"
+        )
+
+    summary_path = persist_summary(executive_summary, synth_dir, short_market)
+
+    ts = datetime.datetime.utcnow().isoformat(timespec="seconds")
+    log_entry = (
+        f"[{ts}] scribe: {len(records)} lineage records -> {lineage_path.name}; "
+        f"summary -> {summary_path.name}"
+    )
+
+    return {
+        "lineage_path": str(lineage_path),
+        "summary_path": str(summary_path),
+        "executive_summary": executive_summary,
         "agent_log": state.get("agent_log", []) + [log_entry],
     }
 
@@ -176,6 +239,7 @@ def build_graph() -> Any:
     builder.add_node("atlas", atlas_node)
     builder.add_node("human_review", human_review_node)
     builder.add_node("finalize", finalize_node)
+    builder.add_node("scribe", scribe_node)
 
     builder.set_entry_point("scout")
     builder.add_edge("scout", "atlas")
@@ -185,6 +249,7 @@ def build_graph() -> Any:
         {"human_review": "human_review", "finalize": "finalize"},
     )
     builder.add_edge("human_review", "finalize")
-    builder.add_edge("finalize", END)
+    builder.add_edge("finalize", "scribe")
+    builder.add_edge("scribe", END)
 
     return builder.compile(checkpointer=_checkpointer)
