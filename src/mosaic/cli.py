@@ -127,6 +127,66 @@ def cmd_scout(args: argparse.Namespace) -> None:
 # Argument parser
 # ---------------------------------------------------------------------------
 
+def cmd_atlas(args: argparse.Namespace) -> None:
+    from rich.console import Console
+    from rich.table import Table
+    from rich import box
+    from rich.panel import Panel
+
+    from mosaic.agents.scout import profile_market
+    from mosaic.agents.atlas import propose_mappings, load_target_schema
+
+    console = Console()
+    market_id, csv_path = _resolve_market(args.market)
+
+    with console.status(f"[bold cyan]Profiling {csv_path.name} (stats only)...", spinner="dots"):
+        profile = profile_market(csv_path, market_id, characterize=False)
+
+    with console.status("[bold cyan]Running ATLAS embeddings + heuristics...", spinner="dots"):
+        target_schema = load_target_schema()
+        proposals = propose_mappings(profile, target_schema)
+
+    auto = sum(1 for p in proposals if not p.requires_human_approval)
+    review = len(proposals) - auto
+
+    header = (
+        f"[bold]{market_id}[/bold]  [dim]|[/dim]  "
+        f"{len(proposals)} columns  [dim]|[/dim]  "
+        f"[green]{auto} auto-approved[/green]  [dim]|[/dim]  "
+        f"[yellow]{review} need review[/yellow]"
+    )
+    console.print(Panel(header, title="[bold blue]ATLAS - Mapping Proposals", expand=False))
+
+    table = Table(box=box.ROUNDED, show_lines=True, highlight=True)
+    table.add_column("Source Column", style="bold cyan", no_wrap=True)
+    table.add_column("Target Field", style="bold green", no_wrap=True)
+    table.add_column("Confidence", justify="right")
+    table.add_column("Review?", justify="center")
+    table.add_column("Alternatives", overflow="fold", max_width=40)
+
+    for p in proposals:
+        conf_str = f"{p.confidence:.3f}"
+        if p.confidence >= 0.85:
+            conf_style = "green"
+        elif p.confidence >= 0.65:
+            conf_style = "yellow"
+        else:
+            conf_style = "red"
+
+        review_str = "[yellow](!)  yes[/yellow]" if p.requires_human_approval else "[green]no[/green]"
+        alts = "  ".join(f"{n} ({s:.2f})" for n, s in p.candidate_alternatives)
+
+        table.add_row(
+            p.source_column,
+            p.target_field or "[red](unmapped)[/red]",
+            f"[{conf_style}]{conf_str}[/{conf_style}]",
+            review_str,
+            alts,
+        )
+
+    console.print(table)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mosaic",
@@ -145,6 +205,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip LLM characterization (stats only, much faster)",
     )
     scout_p.set_defaults(func=cmd_scout)
+
+    # atlas
+    atlas_p = sub.add_parser("atlas", help="Propose column mappings (ATLAS agent)")
+    atlas_p.add_argument(
+        "--market", required=True, choices=["uk", "in", "br"],
+        help="Market to map: uk, in, or br",
+    )
+    atlas_p.set_defaults(func=cmd_atlas)
 
     return parser
 

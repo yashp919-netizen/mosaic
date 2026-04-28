@@ -1,48 +1,76 @@
-# Mosaic Target Schema — canonical product master fields
-# All markets map to these fields via ATLAS
+# Mosaic Target Schema — unified product master fields
+# All source markets map to these fields via ATLAS.
+# Schema matches TargetSchemaField Pydantic model: name, description, dtype, required, example_values.
 
 fields:
   - name: sku_id
-    type: string
     description: Unique product identifier in the target system
+    dtype: string
     required: true
+    example_values: ["MSC-uk-000001", "MSC-in-000042", "MSC-br-001337"]
 
-  - name: product_name
-    type: string
-    description: Canonical English product name
+  - name: global_product_name
+    description: Canonical English product display name
+    dtype: string
     required: true
+    example_values: ["Zephyr Moisturising Body Wash 250ml", "Luminos Repair Shampoo"]
 
   - name: brand
-    type: string
-    description: Brand name
+    description: Brand name of the product
+    dtype: string
     required: true
+    example_values: ["Zephyr", "Luminos", "Vanta"]
 
-  - name: size_ml
-    type: float
-    description: Product size in millilitres
+  - name: size_value
+    description: Numeric product size or volume (unit stored separately in size_unit)
+    dtype: float
     required: false
+    example_values: ["250", "500", "100"]
 
-  - name: weight_g
-    type: float
+  - name: size_unit
+    description: Unit for the size_value field (ml, g, oz, etc.)
+    dtype: string
+    required: false
+    example_values: ["ml", "g", "oz", "mL"]
+
+  - name: weight_grams
     description: Product weight in grams
+    dtype: float
     required: false
+    example_values: ["150.0", "300.5", "500.0"]
 
-  - name: category
-    type: string
-    description: Standardised category path (e.g. Personal Care > Body Wash)
+  - name: category_l1
+    description: Top-level product category (e.g. Personal Care, Household)
+    dtype: string
     required: true
+    example_values: ["Personal Care", "Household", "Food & Beverage"]
+
+  - name: category_l2
+    description: Second-level product category (e.g. Shampoo, Body Wash)
+    dtype: string
+    required: false
+    example_values: ["Shampoo", "Body Wash", "Conditioner", "Surface Cleaner"]
 
   - name: allergens
-    type: list[string]
-    description: List of allergen tags per regulatory standard
+    description: Comma-separated list of allergens per regulatory standard
+    dtype: string
     required: false
+    example_values: ["milk,eggs,wheat", "peanuts,soy", ""]
 
   - name: barcode
-    type: string
-    description: EAN-13 or UPC barcode
+    description: EAN-13 or UPC barcode number
+    dtype: string
     required: false
+    example_values: ["5000112637922", "1819600133891", "0265423511612"]
 
   - name: launch_date
-    type: date
     description: Product launch date in ISO 8601 format (YYYY-MM-DD)
+    dtype: date
     required: false
+    example_values: ["2022-03-15", "2021-11-01", "2023-06-20"]
+
+  - name: source_market
+    description: Source market identifier from which this record was harmonised
+    dtype: string
+    required: true
+    example_values: ["market_uk", "market_in", "market_br"]
