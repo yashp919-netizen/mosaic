@@ -55,6 +55,8 @@ flowchart TD
     G --> H([END])
 ```
 
+**Live demo:** [huggingface.co/spaces/yashp919/mosaic](https://huggingface.co/spaces/yashp919/mosaic) — runs heuristics-only mode, no API key required.
+
 ### Walkthrough
 
 [![Mosaic walkthrough — Brazil market, 90 seconds](https://cdn.loom.com/sessions/thumbnails/7a333ce48c9f446bbdff384248f1dea6-with-play.gif)](https://www.loom.com/share/7a333ce48c9f446bbdff384248f1dea6)
