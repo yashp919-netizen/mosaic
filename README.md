@@ -1,6 +1,6 @@
 # Mosaic
 
-**A multi-agent AI pipeline that harmonizes CPG product master data across legacy market schemas during cloud migration.**
+Mosaic compresses weeks of CPG product master analysis to minutes — three LangGraph agents profile, map, and audit source-to-target harmonization with a quantified confidence score on every decision.
 
 [![Eval](https://github.com/yashp919-netizen/mosaic/actions/workflows/eval.yml/badge.svg)](https://github.com/yashp919-netizen/mosaic/actions/workflows/eval.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -148,6 +148,6 @@ Mosaic is a public-source-informed reference architecture. It is not built with,
 
 ## License
 
-MIT © Yash Puranik
+MIT © Kumar Yashvardhan Puri
 
 Inspired by publicly disclosed CPG industry transformation programs. Built independently. See [`docs/public-sources.md`](docs/public-sources.md).
