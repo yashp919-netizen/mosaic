@@ -5,14 +5,11 @@ Separated from scout.py to keep the stats layer importable without an LLM client
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from mosaic.prompts.loader import load_prompt
 from mosaic.schemas import ColumnProfile, MarketProfile
-
-_PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "scout_characterize_v1.md"
 
 _VALID_FLAGS = {
     "mixed_languages",
@@ -31,6 +28,7 @@ _VALID_FLAGS = {
 # ---------------------------------------------------------------------------
 # Structured output schema for the LLM
 # ---------------------------------------------------------------------------
+
 
 class ColumnCharacterization(BaseModel):
     """Structured LLM output for one column.
@@ -77,20 +75,11 @@ class ColumnCharacterization(BaseModel):
 # Prompt loader
 # ---------------------------------------------------------------------------
 
-def _load_prompt(col: ColumnProfile) -> str:
-    template = _PROMPT_PATH.read_text(encoding="utf-8")
-    # Strip YAML frontmatter (between first two --- lines)
-    lines = template.splitlines()
-    body_start = 0
-    if lines[0].strip() == "---":
-        for i, line in enumerate(lines[1:], 1):
-            if line.strip() == "---":
-                body_start = i + 1
-                break
-    body = "\n".join(lines[body_start:])
 
+def _load_prompt(col: ColumnProfile) -> str:
     samples_str = ", ".join(f'"{v}"' for v in col.value_samples[:5]) or "(none)"
-    return body.format(
+    return load_prompt(
+        "scout_characterize_v1",
         column_name=col.column_name,
         inferred_dtype=col.inferred_dtype,
         null_rate_pct=f"{col.null_rate * 100:.1f}",
@@ -102,6 +91,7 @@ def _load_prompt(col: ColumnProfile) -> str:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def characterize_columns(profile: MarketProfile, llm_client) -> MarketProfile:
     """Fill llm_description and data_quality_flags for each column in profile.
@@ -118,16 +108,20 @@ def characterize_columns(profile: MarketProfile, llm_client) -> MarketProfile:
                 response_model=ColumnCharacterization,
             )
             clean_flags = [f for f in result.quality_flags if f in _VALID_FLAGS]
-            updated_col = col.model_copy(update={
-                "llm_description": result.business_description,
-                "data_quality_flags": clean_flags,
-            })
+            updated_col = col.model_copy(
+                update={
+                    "llm_description": result.business_description,
+                    "data_quality_flags": clean_flags,
+                }
+            )
         except Exception as exc:
             # Degrade gracefully — leave description empty, flag the error
-            updated_col = col.model_copy(update={
-                "llm_description": f"[characterization failed: {exc}]",
-                "data_quality_flags": [],
-            })
+            updated_col = col.model_copy(
+                update={
+                    "llm_description": f"[characterization failed: {exc}]",
+                    "data_quality_flags": [],
+                }
+            )
 
         updated_columns.append(updated_col)
 

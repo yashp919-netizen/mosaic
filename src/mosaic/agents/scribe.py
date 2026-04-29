@@ -16,12 +16,14 @@ import pandas as pd
 from pydantic import BaseModel
 
 from mosaic.orchestrator.state import MosaicState
+from mosaic.prompts.loader import load_prompt
 from mosaic.schemas import LineageRecord, MappingProposal
 
 
 # ---------------------------------------------------------------------------
 # Lineage generation
 # ---------------------------------------------------------------------------
+
 
 def generate_lineage(
     state: MosaicState,
@@ -99,17 +101,12 @@ def persist_lineage(records: list[LineageRecord], output_dir: Path, market_id: s
 # Executive summary
 # ---------------------------------------------------------------------------
 
+
 class _SummaryOutput(BaseModel):
     """Structured LLM output for the executive summary. Single field keeps the
     LLM grounded — it cannot add fields or stray from the provided data."""
 
     summary: str
-
-
-def _load_summary_prompt() -> str:
-    """Load the summary prompt template from disk."""
-    prompt_path = Path(__file__).parent.parent / "prompts" / "scribe_summary_v1.md"
-    return prompt_path.read_text(encoding="utf-8")
 
 
 def _build_run_summary(state: MosaicState, lineage: list[LineageRecord]) -> dict[str, Any]:
@@ -123,8 +120,8 @@ def _build_run_summary(state: MosaicState, lineage: list[LineageRecord]) -> dict
     human_reviewed = sum(1 for v in human_decisions.values() if v is not None)
     rejected = sum(1 for v in human_decisions.values() if v is None)
     unmapped = [p.source_column for p in proposals if p.target_field is None]
-    quality_issues = (profile.data_quality_issues[:3] if profile else [])
-    runtime = (profile.profiling_runtime_seconds if profile else 0.0)
+    quality_issues = profile.data_quality_issues[:3] if profile else []
+    runtime = profile.profiling_runtime_seconds if profile else 0.0
 
     return {
         "market_id": state["market_id"],
@@ -151,9 +148,8 @@ def generate_summary(
     numbers not present in the structured input.
     """
     run_summary = _build_run_summary(state, lineage)
-    prompt_template = _load_summary_prompt()
+    prompt_template = load_prompt("scribe_summary_v1")
 
-    # Inject the structured data into the prompt
     data_block = json.dumps(run_summary, indent=2)
     user_content = prompt_template + f"\n\n---\nRUN DATA:\n```json\n{data_block}\n```"
 
@@ -168,5 +164,7 @@ def persist_summary(summary: str, output_dir: Path, market_id: str) -> Path:
     """Write the executive summary to a markdown file."""
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir / f"summary_{market_id}.md"
-    out_path.write_text(f"# Mosaic Executive Summary — {market_id.upper()}\n\n{summary}\n", encoding="utf-8")
+    out_path.write_text(
+        f"# Mosaic Executive Summary — {market_id.upper()}\n\n{summary}\n", encoding="utf-8"
+    )
     return out_path

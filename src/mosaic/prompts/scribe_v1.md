@@ -1,3 +1,8 @@
-# SCRIBE Prompt v1
+---
+purpose: Alias/index for Scribe prompts — the active summary prompt is scribe_summary_v1.md
+version: v1
+agent: SCRIBE
+expected_output_schema: _SummaryOutput
+---
 
-*To be authored on Day 6.*
+> The active Scribe prompt is **scribe_summary_v1.md**.
