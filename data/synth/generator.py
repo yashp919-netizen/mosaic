@@ -21,7 +21,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 try:
-    from faker import Faker
+    from faker import Faker  # noqa: F401
 except ImportError:
     print("faker not installed. Run: pip install faker", file=sys.stderr)
     sys.exit(1)
@@ -31,16 +31,56 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 BRANDS = [
-    "Zephyr", "Luminos", "Vanta", "Oralix", "Purevex",
-    "Helix", "Solven", "Glova", "Tresol", "Brightway",
-    "Nexpur", "Kaleo", "Serafix", "Aurova", "Plexum",
-    "Cristalix", "Verdant", "Nuvelo", "Elaris", "Frostine",
-    "Toreva", "Qualis", "Zenpur", "Vivara", "Motivo",
-    "Cladis", "Purelix", "Sovara", "Orinum", "Cryston",
-    "Velaris", "Solaris", "Primus", "Alteva", "Novix",
-    "Luxara", "Clarity", "Frosten", "Aevum", "Lumeva",
-    "Teraxis", "Gleam", "Polvera", "Solvix", "Nuarix",
-    "Hevara", "Glicen", "Tolvex", "Krisol", "Arovia",
+    "Zephyr",
+    "Luminos",
+    "Vanta",
+    "Oralix",
+    "Purevex",
+    "Helix",
+    "Solven",
+    "Glova",
+    "Tresol",
+    "Brightway",
+    "Nexpur",
+    "Kaleo",
+    "Serafix",
+    "Aurova",
+    "Plexum",
+    "Cristalix",
+    "Verdant",
+    "Nuvelo",
+    "Elaris",
+    "Frostine",
+    "Toreva",
+    "Qualis",
+    "Zenpur",
+    "Vivara",
+    "Motivo",
+    "Cladis",
+    "Purelix",
+    "Sovara",
+    "Orinum",
+    "Cryston",
+    "Velaris",
+    "Solaris",
+    "Primus",
+    "Alteva",
+    "Novix",
+    "Luxara",
+    "Clarity",
+    "Frosten",
+    "Aevum",
+    "Lumeva",
+    "Teraxis",
+    "Gleam",
+    "Polvera",
+    "Solvix",
+    "Nuarix",
+    "Hevara",
+    "Glicen",
+    "Tolvex",
+    "Krisol",
+    "Arovia",
 ]
 
 CATEGORIES_UK = [
@@ -59,64 +99,162 @@ CATEGORIES_UK = [
 ]
 
 CATEGORY_TO_IN = {
-    "Personal Care > Body Wash":      "PC-BW",
-    "Personal Care > Shampoo":        "PC-SH",
-    "Personal Care > Conditioner":    "PC-CD",
-    "Personal Care > Face Wash":      "PC-FW",
-    "Personal Care > Moisturiser":    "PC-MS",
-    "Personal Care > Deodorant":      "PC-DO",
-    "Personal Care > Hand Wash":      "PC-HW",
-    "Household > Surface Cleaner":    "HH-SC",
-    "Household > Laundry":            "HH-LN",
-    "Household > Dishwash":           "HH-DW",
-    "Food & Beverage > Condiments":   "FB-CN",
-    "Food & Beverage > Snacks":       "FB-SN",
+    "Personal Care > Body Wash": "PC-BW",
+    "Personal Care > Shampoo": "PC-SH",
+    "Personal Care > Conditioner": "PC-CD",
+    "Personal Care > Face Wash": "PC-FW",
+    "Personal Care > Moisturiser": "PC-MS",
+    "Personal Care > Deodorant": "PC-DO",
+    "Personal Care > Hand Wash": "PC-HW",
+    "Household > Surface Cleaner": "HH-SC",
+    "Household > Laundry": "HH-LN",
+    "Household > Dishwash": "HH-DW",
+    "Food & Beverage > Condiments": "FB-CN",
+    "Food & Beverage > Snacks": "FB-SN",
 }
 
 CATEGORY_TO_BR = {
-    "Personal Care > Body Wash":      "Cuidados Pessoais > Banho",
-    "Personal Care > Shampoo":        "Cuidados Pessoais > Cabelo > Shampoo",
-    "Personal Care > Conditioner":    "Cuidados Pessoais > Cabelo > Condicionador",
-    "Personal Care > Face Wash":      "Cuidados Pessoais > Rosto > Limpeza",
-    "Personal Care > Moisturiser":    "Cuidados Pessoais > Rosto > Hidratação",
-    "Personal Care > Deodorant":      "Cuidados Pessoais > Desodorante",
-    "Personal Care > Hand Wash":      "Cuidados Pessoais > Sabonete Líquido",
-    "Household > Surface Cleaner":    "Casa > Limpeza > Superfícies",
-    "Household > Laundry":            "Casa > Lavanderia",
-    "Household > Dishwash":           "Casa > Limpeza > Louças",
-    "Food & Beverage > Condiments":   "Alimentos > Condimentos",
-    "Food & Beverage > Snacks":       "Alimentos > Petiscos",
+    "Personal Care > Body Wash": "Cuidados Pessoais > Banho",
+    "Personal Care > Shampoo": "Cuidados Pessoais > Cabelo > Shampoo",
+    "Personal Care > Conditioner": "Cuidados Pessoais > Cabelo > Condicionador",
+    "Personal Care > Face Wash": "Cuidados Pessoais > Rosto > Limpeza",
+    "Personal Care > Moisturiser": "Cuidados Pessoais > Rosto > Hidratação",
+    "Personal Care > Deodorant": "Cuidados Pessoais > Desodorante",
+    "Personal Care > Hand Wash": "Cuidados Pessoais > Sabonete Líquido",
+    "Household > Surface Cleaner": "Casa > Limpeza > Superfícies",
+    "Household > Laundry": "Casa > Lavanderia",
+    "Household > Dishwash": "Casa > Limpeza > Louças",
+    "Food & Beverage > Condiments": "Alimentos > Condimentos",
+    "Food & Beverage > Snacks": "Alimentos > Petiscos",
 }
 
 PRODUCT_TYPES: dict[str, list[str]] = {
-    "Personal Care > Body Wash":    ["Moisturising Body Wash", "Refreshing Shower Gel", "Nourishing Body Cleanser", "Deep Clean Body Wash", "Sensitive Skin Body Wash"],
-    "Personal Care > Shampoo":      ["Hydrating Shampoo", "Volumising Shampoo", "Anti-Dandruff Shampoo", "Repair Shampoo", "Colour Protect Shampoo"],
-    "Personal Care > Conditioner":  ["Deep Conditioner", "Leave-In Conditioner", "Repair Conditioner", "Volumising Conditioner", "Smooth & Shine Conditioner"],
-    "Personal Care > Face Wash":    ["Gentle Face Wash", "Oil Control Face Wash", "Brightening Face Wash", "Exfoliating Face Scrub", "Hydrating Face Wash"],
-    "Personal Care > Moisturiser":  ["Daily Moisturiser", "Night Cream", "SPF Moisturiser", "Intensive Moisturiser", "Lightweight Lotion"],
-    "Personal Care > Deodorant":    ["24hr Roll-On Deodorant", "48hr Spray Deodorant", "Sport Deodorant", "Sensitive Deodorant", "Whitening Deodorant"],
-    "Personal Care > Hand Wash":    ["Antibacterial Hand Wash", "Moisturising Hand Wash", "Fragrance-Free Hand Wash", "Foaming Hand Wash", "Aloe Hand Wash"],
-    "Household > Surface Cleaner":  ["Multi-Surface Spray", "Kitchen Cleaner", "Bathroom Cleaner", "Glass Cleaner", "Disinfectant Spray"],
-    "Household > Laundry":          ["Liquid Laundry Detergent", "Laundry Powder", "Fabric Softener", "Laundry Capsules", "Stain Remover"],
-    "Household > Dishwash":         ["Dish Liquid", "Dishwasher Tablets", "Rinse Aid", "Heavy Duty Dish Soap", "Eco Dish Liquid"],
-    "Food & Beverage > Condiments": ["Tomato Ketchup", "Mayonnaise", "Mustard Sauce", "Hot Chilli Sauce", "Vinegar Dressing"],
-    "Food & Beverage > Snacks":     ["Salted Crackers", "Mixed Nuts Blend", "Granola Bar", "Rice Cakes", "Oat Protein Bar"],
+    "Personal Care > Body Wash": [
+        "Moisturising Body Wash",
+        "Refreshing Shower Gel",
+        "Nourishing Body Cleanser",
+        "Deep Clean Body Wash",
+        "Sensitive Skin Body Wash",
+    ],
+    "Personal Care > Shampoo": [
+        "Hydrating Shampoo",
+        "Volumising Shampoo",
+        "Anti-Dandruff Shampoo",
+        "Repair Shampoo",
+        "Colour Protect Shampoo",
+    ],
+    "Personal Care > Conditioner": [
+        "Deep Conditioner",
+        "Leave-In Conditioner",
+        "Repair Conditioner",
+        "Volumising Conditioner",
+        "Smooth & Shine Conditioner",
+    ],
+    "Personal Care > Face Wash": [
+        "Gentle Face Wash",
+        "Oil Control Face Wash",
+        "Brightening Face Wash",
+        "Exfoliating Face Scrub",
+        "Hydrating Face Wash",
+    ],
+    "Personal Care > Moisturiser": [
+        "Daily Moisturiser",
+        "Night Cream",
+        "SPF Moisturiser",
+        "Intensive Moisturiser",
+        "Lightweight Lotion",
+    ],
+    "Personal Care > Deodorant": [
+        "24hr Roll-On Deodorant",
+        "48hr Spray Deodorant",
+        "Sport Deodorant",
+        "Sensitive Deodorant",
+        "Whitening Deodorant",
+    ],
+    "Personal Care > Hand Wash": [
+        "Antibacterial Hand Wash",
+        "Moisturising Hand Wash",
+        "Fragrance-Free Hand Wash",
+        "Foaming Hand Wash",
+        "Aloe Hand Wash",
+    ],
+    "Household > Surface Cleaner": [
+        "Multi-Surface Spray",
+        "Kitchen Cleaner",
+        "Bathroom Cleaner",
+        "Glass Cleaner",
+        "Disinfectant Spray",
+    ],
+    "Household > Laundry": [
+        "Liquid Laundry Detergent",
+        "Laundry Powder",
+        "Fabric Softener",
+        "Laundry Capsules",
+        "Stain Remover",
+    ],
+    "Household > Dishwash": [
+        "Dish Liquid",
+        "Dishwasher Tablets",
+        "Rinse Aid",
+        "Heavy Duty Dish Soap",
+        "Eco Dish Liquid",
+    ],
+    "Food & Beverage > Condiments": [
+        "Tomato Ketchup",
+        "Mayonnaise",
+        "Mustard Sauce",
+        "Hot Chilli Sauce",
+        "Vinegar Dressing",
+    ],
+    "Food & Beverage > Snacks": [
+        "Salted Crackers",
+        "Mixed Nuts Blend",
+        "Granola Bar",
+        "Rice Cakes",
+        "Oat Protein Bar",
+    ],
 }
 
-ALLERGENS_EN = ["milk", "eggs", "wheat", "soy", "peanuts", "tree nuts", "fish", "shellfish", "sesame", "gluten"]
+ALLERGENS_EN = [
+    "milk",
+    "eggs",
+    "wheat",
+    "soy",
+    "peanuts",
+    "tree nuts",
+    "fish",
+    "shellfish",
+    "sesame",
+    "gluten",
+]
 
 ALLERGEN_TO_PT = {
-    "milk": "leite", "eggs": "ovos", "wheat": "trigo", "soy": "soja",
-    "peanuts": "amendoim", "tree nuts": "castanhas", "fish": "peixe",
-    "shellfish": "crustáceos", "sesame": "gergelim", "gluten": "glúten",
+    "milk": "leite",
+    "eggs": "ovos",
+    "wheat": "trigo",
+    "soy": "soja",
+    "peanuts": "amendoim",
+    "tree nuts": "castanhas",
+    "fish": "peixe",
+    "shellfish": "crustáceos",
+    "sesame": "gergelim",
+    "gluten": "glúten",
 }
 
 SIZE_ML_OPTIONS = [50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000]
 WEIGHT_G_OPTIONS = [50, 75, 100, 150, 200, 250, 300, 400, 500]
 
 DEVANAGARI_WORDS = [
-    "शैम्पू", "साबुन", "क्रीम", "लोशन", "जेल",
-    "पाउडर", "तेल", "फोम", "स्प्रे", "सीरम",
+    "शैम्पू",
+    "साबुन",
+    "क्रीम",
+    "लोशन",
+    "जेल",
+    "पाउडर",
+    "तेल",
+    "फोम",
+    "स्प्रे",
+    "सीरम",
 ]
 
 TEST_POISON_PREFIXES = ["TEST-", "XXX-", "DUMMY-"]
@@ -125,6 +263,7 @@ TEST_POISON_PREFIXES = ["TEST-", "XXX-", "DUMMY-"]
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _random_allergens(rng: random.Random) -> list[str]:
     k = rng.randint(0, 4)
@@ -163,6 +302,7 @@ def _ean13(rng: random.Random) -> str:
 # Concept generation
 # ---------------------------------------------------------------------------
 
+
 def build_concepts(n: int, rng: random.Random) -> list[dict]:
     """Generate n canonical product concepts shared across all markets."""
     concepts = []
@@ -175,23 +315,26 @@ def build_concepts(n: int, rng: random.Random) -> list[dict]:
         allergens = _random_allergens(rng)
         barcode = _ean13(rng)
         launch_date = _random_date(rng)
-        concepts.append({
-            "idx": i,
-            "category": category,
-            "product_name": f"{brand} {product_type}",
-            "brand": brand,
-            "size_ml": size_ml,
-            "weight_g": weight_g,
-            "allergens": allergens,
-            "barcode": barcode,
-            "launch_date": launch_date,
-        })
+        concepts.append(
+            {
+                "idx": i,
+                "category": category,
+                "product_name": f"{brand} {product_type}",
+                "brand": brand,
+                "size_ml": size_ml,
+                "weight_g": weight_g,
+                "allergens": allergens,
+                "barcode": barcode,
+                "launch_date": launch_date,
+            }
+        )
     return concepts
 
 
 # ---------------------------------------------------------------------------
 # Row builders
 # ---------------------------------------------------------------------------
+
 
 def build_uk_row(concept: dict, sku_id: str) -> dict:
     allergens_str = ",".join(concept["allergens"]) if concept["allergens"] else ""
@@ -235,7 +378,9 @@ def build_in_row(concept: dict, sku_id: str, rng: random.Random, use_devanagari:
 
 
 def build_br_row(concept: dict, sku_id: str) -> dict:
-    allergens_pt = ",".join(ALLERGEN_TO_PT[a] for a in concept["allergens"]) if concept["allergens"] else ""
+    allergens_pt = (
+        ",".join(ALLERGEN_TO_PT[a] for a in concept["allergens"]) if concept["allergens"] else ""
+    )
     d = concept["launch_date"]
     date_str = f"{d.day:02d}/{d.month:02d}/{d.year}"
 
@@ -256,6 +401,7 @@ def build_br_row(concept: dict, sku_id: str) -> dict:
 # Main generation logic
 # ---------------------------------------------------------------------------
 
+
 def generate(n: int, seed: int, out_dir: Path) -> None:
     rng = random.Random(seed)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -266,18 +412,22 @@ def generate(n: int, seed: int, out_dir: Path) -> None:
     all_indices = list(range(n))
     rng.shuffle(all_indices)
 
-    n_dup      = math.ceil(n * 0.03)   # 3%  duplicate SKUs
-    n_allergen = math.ceil(n * 0.05)   # 5%  allergen mismatches
-    n_glitch   = math.ceil(n * 0.02)   # 2%  encoding glitches (BR only)
-    n_units    = math.ceil(n * 0.01)   # 1%  inconsistent units (UK only)
-    n_poison   = math.ceil(n * 0.04)   # 4%  test-data poison
+    n_dup = math.ceil(n * 0.03)  # 3%  duplicate SKUs
+    n_allergen = math.ceil(n * 0.05)  # 5%  allergen mismatches
+    n_glitch = math.ceil(n * 0.02)  # 2%  encoding glitches (BR only)
+    n_units = math.ceil(n * 0.01)  # 1%  inconsistent units (UK only)
+    n_poison = math.ceil(n * 0.04)  # 4%  test-data poison
 
     offset = 0
-    dup_indices     = set(all_indices[offset : offset + n_dup]);    offset += n_dup
-    allergen_indices= set(all_indices[offset : offset + n_allergen]); offset += n_allergen
-    glitch_indices  = set(all_indices[offset : offset + n_glitch]); offset += n_glitch
-    units_indices   = set(all_indices[offset : offset + n_units]);  offset += n_units
-    poison_indices  = set(all_indices[offset : offset + n_poison])
+    dup_indices = set(all_indices[offset : offset + n_dup])
+    offset += n_dup
+    allergen_indices = set(all_indices[offset : offset + n_allergen])
+    offset += n_allergen
+    glitch_indices = set(all_indices[offset : offset + n_glitch])
+    offset += n_glitch
+    units_indices = set(all_indices[offset : offset + n_units])
+    offset += n_units
+    poison_indices = set(all_indices[offset : offset + n_poison])
 
     # --- Build rows ---
     uk_rows, in_rows, br_rows = [], [], []
@@ -337,35 +487,47 @@ def generate(n: int, seed: int, out_dir: Path) -> None:
         "generated_at": date.today().isoformat(),
         "mappings": [
             # UK
-            {"market": "market_uk", "source_column": "sku_id",       "target_field": "sku_id"},
-            {"market": "market_uk", "source_column": "product_name",  "target_field": "product_name"},
-            {"market": "market_uk", "source_column": "brand",         "target_field": "brand"},
-            {"market": "market_uk", "source_column": "size_ml",       "target_field": "size_ml"},
-            {"market": "market_uk", "source_column": "weight_g",      "target_field": "weight_g"},
-            {"market": "market_uk", "source_column": "category",      "target_field": "category"},
-            {"market": "market_uk", "source_column": "allergens",     "target_field": "allergens"},
-            {"market": "market_uk", "source_column": "barcode",       "target_field": "barcode"},
-            {"market": "market_uk", "source_column": "launch_date",   "target_field": "launch_date"},
+            {"market": "market_uk", "source_column": "sku_id", "target_field": "sku_id"},
+            {
+                "market": "market_uk",
+                "source_column": "product_name",
+                "target_field": "product_name",
+            },
+            {"market": "market_uk", "source_column": "brand", "target_field": "brand"},
+            {"market": "market_uk", "source_column": "size_ml", "target_field": "size_ml"},
+            {"market": "market_uk", "source_column": "weight_g", "target_field": "weight_g"},
+            {"market": "market_uk", "source_column": "category", "target_field": "category"},
+            {"market": "market_uk", "source_column": "allergens", "target_field": "allergens"},
+            {"market": "market_uk", "source_column": "barcode", "target_field": "barcode"},
+            {"market": "market_uk", "source_column": "launch_date", "target_field": "launch_date"},
             # IN
-            {"market": "market_in", "source_column": "SKU_CD",  "target_field": "sku_id"},
+            {"market": "market_in", "source_column": "SKU_CD", "target_field": "sku_id"},
             {"market": "market_in", "source_column": "PROD_NM", "target_field": "product_name"},
-            {"market": "market_in", "source_column": "BRND",    "target_field": "brand"},
-            {"market": "market_in", "source_column": "SZ",      "target_field": "size_ml"},
-            {"market": "market_in", "source_column": "WT_GMS",  "target_field": "weight_g"},
-            {"market": "market_in", "source_column": "CAT_CD",  "target_field": "category"},
-            {"market": "market_in", "source_column": "ALLRGY",  "target_field": "allergens"},
-            {"market": "market_in", "source_column": "EAN",     "target_field": "barcode"},
+            {"market": "market_in", "source_column": "BRND", "target_field": "brand"},
+            {"market": "market_in", "source_column": "SZ", "target_field": "size_ml"},
+            {"market": "market_in", "source_column": "WT_GMS", "target_field": "weight_g"},
+            {"market": "market_in", "source_column": "CAT_CD", "target_field": "category"},
+            {"market": "market_in", "source_column": "ALLRGY", "target_field": "allergens"},
+            {"market": "market_in", "source_column": "EAN", "target_field": "barcode"},
             {"market": "market_in", "source_column": "DT_LNCH", "target_field": "launch_date"},
             # BR
-            {"market": "market_br", "source_column": "codigo_sku",        "target_field": "sku_id"},
-            {"market": "market_br", "source_column": "nome_produto",       "target_field": "product_name"},
-            {"market": "market_br", "source_column": "marca",              "target_field": "brand"},
-            {"market": "market_br", "source_column": "tamanho",            "target_field": "size_ml"},
-            {"market": "market_br", "source_column": "peso_oz",            "target_field": "weight_g"},
-            {"market": "market_br", "source_column": "categoria",          "target_field": "category"},
-            {"market": "market_br", "source_column": "alergenos",          "target_field": "allergens"},
-            {"market": "market_br", "source_column": "codigo_barras",      "target_field": "barcode"},
-            {"market": "market_br", "source_column": "data_lancamento",    "target_field": "launch_date"},
+            {"market": "market_br", "source_column": "codigo_sku", "target_field": "sku_id"},
+            {
+                "market": "market_br",
+                "source_column": "nome_produto",
+                "target_field": "product_name",
+            },
+            {"market": "market_br", "source_column": "marca", "target_field": "brand"},
+            {"market": "market_br", "source_column": "tamanho", "target_field": "size_ml"},
+            {"market": "market_br", "source_column": "peso_oz", "target_field": "weight_g"},
+            {"market": "market_br", "source_column": "categoria", "target_field": "category"},
+            {"market": "market_br", "source_column": "alergenos", "target_field": "allergens"},
+            {"market": "market_br", "source_column": "codigo_barras", "target_field": "barcode"},
+            {
+                "market": "market_br",
+                "source_column": "data_lancamento",
+                "target_field": "launch_date",
+            },
         ],
         "planted_issues": [
             {
@@ -424,7 +586,7 @@ def generate(n: int, seed: int, out_dir: Path) -> None:
     print(f"  market_uk.csv : {len(uk_rows):,} rows")
     print(f"  market_in.csv : {len(in_rows):,} rows")
     print(f"  market_br.csv : {len(br_rows):,} rows")
-    print(f"  ground_truth.json written")
+    print("  ground_truth.json written")
     print(f"\nPlanted issues (seed={seed}):")
     print(f"  duplicate_sku        : {len(dup_indices):>4} rows  (3%)")
     print(f"  allergen_mismatch    : {len(allergen_indices):>4} rows  (5%)")
@@ -446,10 +608,13 @@ def _write_csv(path: Path, rows: list[dict], delimiter: str) -> None:
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Mosaic synthetic data generator")
-    parser.add_argument("--seed",    type=int, default=42,            help="Random seed (default: 42)")
-    parser.add_argument("--n",       type=int, default=5000,          help="Number of product concepts (default: 5000)")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
+    parser.add_argument(
+        "--n", type=int, default=5000, help="Number of product concepts (default: 5000)"
+    )
     parser.add_argument("--out-dir", type=Path, default=Path("data/synth"), help="Output directory")
     args = parser.parse_args()
 

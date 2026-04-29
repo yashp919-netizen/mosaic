@@ -25,7 +25,7 @@ class MosaicState(TypedDict):
     # SCOUT output
     profile: MarketProfile | None
     # source_df is NOT stored here — DataFrames are not checkpointer-serializable.
-    # Day 6 (Scribe) will re-read csv_path directly.
+    # Scribe re-reads csv_path directly to avoid serialization overhead.
 
     # ATLAS output
     proposals: list[MappingProposal]
@@ -39,8 +39,8 @@ class MosaicState(TypedDict):
     final_mappings: list[MappingProposal]
 
     # SCRIBE output
-    lineage_path: str     # path to the persisted lineage_{market}.jsonl
-    summary_path: str     # path to the persisted summary_{market}.md
+    lineage_path: str  # path to the persisted lineage_{market}.jsonl
+    summary_path: str  # path to the persisted summary_{market}.md
     executive_summary: str  # raw summary text (also in the .md file)
 
     # Audit trail — each agent appends a short message

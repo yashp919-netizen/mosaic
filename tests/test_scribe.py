@@ -8,15 +8,21 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pandas as pd
-import pytest
 
-from mosaic.agents.scribe import generate_lineage, persist_lineage
-from mosaic.schemas import MappingProposal
+from mosaic.agents.scribe import (
+    _build_run_summary,
+    generate_lineage,
+    generate_summary,
+    persist_lineage,
+    persist_summary,
+)
+from mosaic.schemas import ColumnProfile, MappingProposal, MarketProfile
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 def _make_state(market_id: str = "uk", human_decisions: dict | None = None) -> dict:
     proposals = [
@@ -53,16 +59,19 @@ def _make_state(market_id: str = "uk", human_decisions: dict | None = None) -> d
 
 
 def _make_df(n: int = 10) -> pd.DataFrame:
-    return pd.DataFrame({
-        "sku_id": [f"SKU-{i:04d}" for i in range(n)],
-        "product_name": [f"Product {i}" for i in range(n)],
-        "brand": ["BrandA"] * n,
-    })
+    return pd.DataFrame(
+        {
+            "sku_id": [f"SKU-{i:04d}" for i in range(n)],
+            "product_name": [f"Product {i}" for i in range(n)],
+            "brand": ["BrandA"] * n,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_generate_lineage_row_count():
     """One LineageRecord per source row."""
@@ -151,9 +160,6 @@ def test_persist_lineage_one_record_per_row():
 # Task 2 — Executive summary tests
 # ---------------------------------------------------------------------------
 
-from mosaic.agents.scribe import _build_run_summary, generate_summary, persist_summary
-from mosaic.schemas import MarketProfile, ColumnProfile
-
 
 def _make_state_with_profile(**kwargs) -> dict:
     """State with a real MarketProfile so _build_run_summary can read quality issues."""
@@ -184,10 +190,16 @@ def test_build_run_summary_keys():
     summary_input = _build_run_summary(state, records)
 
     required_keys = {
-        "market_id", "row_count", "total_columns",
-        "auto_approved_count", "human_reviewed_count", "rejected_count",
-        "final_mapping_count", "top_quality_issues",
-        "profiling_runtime_seconds", "unmapped_columns",
+        "market_id",
+        "row_count",
+        "total_columns",
+        "auto_approved_count",
+        "human_reviewed_count",
+        "rejected_count",
+        "final_mapping_count",
+        "top_quality_issues",
+        "profiling_runtime_seconds",
+        "unmapped_columns",
     }
     assert required_keys.issubset(summary_input.keys())
 
@@ -233,8 +245,9 @@ def test_generate_summary_uses_llm_client():
 
     assert mock_client.create.called
     call_kwargs = mock_client.create.call_args
-    assert call_kwargs.kwargs.get("response_model") is _SummaryOutput or \
-           (call_kwargs.args and call_kwargs.args[0] is _SummaryOutput)
+    assert call_kwargs.kwargs.get("response_model") is _SummaryOutput or (
+        call_kwargs.args and call_kwargs.args[0] is _SummaryOutput
+    )
     assert isinstance(result, str)
     assert len(result) > 0
 

@@ -41,6 +41,7 @@ def _resolve_market(key: str) -> tuple[str, Path]:
 # scout subcommand
 # ---------------------------------------------------------------------------
 
+
 def cmd_scout(args: argparse.Namespace) -> None:
     from rich.console import Console
     from rich.table import Table
@@ -56,6 +57,7 @@ def cmd_scout(args: argparse.Namespace) -> None:
     llm_client = None
     if not args.no_llm:
         from mosaic.llm.factory import get_llm
+
         llm_client = get_llm("ollama")
 
     with console.status(f"[bold cyan]Profiling {csv_path.name}...", spinner="dots"):
@@ -104,7 +106,11 @@ def cmd_scout(args: argparse.Namespace) -> None:
         null_style = "red" if col.null_rate > 0.5 else ("yellow" if col.null_rate > 0.2 else "")
         samples_str = ", ".join(col.value_samples[:3])
         flags_str = "\n".join(col.data_quality_flags) if col.data_quality_flags else "[dim]-[/dim]"
-        desc = col.llm_description[:120] + "…" if len(col.llm_description) > 120 else col.llm_description
+        desc = (
+            col.llm_description[:120] + "…"
+            if len(col.llm_description) > 120
+            else col.llm_description
+        )
         if not desc:
             desc = "[dim](no LLM)[/dim]"
 
@@ -127,6 +133,7 @@ def cmd_scout(args: argparse.Namespace) -> None:
 # Argument parser
 # ---------------------------------------------------------------------------
 
+
 def cmd_atlas(args: argparse.Namespace) -> None:
     import json
     from rich.console import Console
@@ -143,12 +150,15 @@ def cmd_atlas(args: argparse.Namespace) -> None:
     llm_client = None
     if not args.no_llm:
         from mosaic.llm.factory import get_llm
+
         llm_client = get_llm("ollama")
 
     with console.status(f"[bold cyan]Profiling {csv_path.name} (stats only)...", spinner="dots"):
         profile = profile_market(csv_path, market_id, characterize=False)
 
-    llm_label = "embeddings + heuristics + LLM reasoning" if llm_client else "embeddings + heuristics"
+    llm_label = (
+        "embeddings + heuristics + LLM reasoning" if llm_client else "embeddings + heuristics"
+    )
     with console.status(f"[bold cyan]Running ATLAS ({llm_label})...", spinner="dots"):
         target_schema = load_target_schema()
         proposals = propose_mappings(profile, target_schema, llm_client=llm_client)
@@ -181,9 +191,15 @@ def cmd_atlas(args: argparse.Namespace) -> None:
         else:
             conf_style = "red"
 
-        review_str = "[yellow](!)  yes[/yellow]" if p.requires_human_approval else "[green]no[/green]"
+        review_str = (
+            "[yellow](!)  yes[/yellow]" if p.requires_human_approval else "[green]no[/green]"
+        )
         alts = "  ".join(f"{n} ({s:.2f})" for n, s in p.candidate_alternatives)
-        reasoning = (p.reasoning[:100] + "…") if len(p.reasoning) > 100 else (p.reasoning or "[dim](none)[/dim]")
+        reasoning = (
+            (p.reasoning[:100] + "…")
+            if len(p.reasoning) > 100
+            else (p.reasoning or "[dim](none)[/dim]")
+        )
 
         table.add_row(
             p.source_column,
@@ -210,6 +226,7 @@ def cmd_atlas(args: argparse.Namespace) -> None:
 # ---------------------------------------------------------------------------
 # run subcommand (full pipeline with human-in-the-loop review)
 # ---------------------------------------------------------------------------
+
 
 def _prompt_decision(
     console,
@@ -332,9 +349,7 @@ def cmd_run(args: argparse.Namespace) -> None:
             alts = proposal.candidate_alternatives or []
             conf = proposal.confidence
             reason = proposal.reasoning or ""
-            decision = _prompt_decision(
-                console, src, top, alts, conf, reason, valid_target_names
-            )
+            decision = _prompt_decision(console, src, top, alts, conf, reason, valid_target_names)
             human_decisions[src] = decision
 
         # Resume the graph — human_review_node gets decisions as interrupt()'s return value
@@ -391,6 +406,7 @@ def cmd_run(args: argparse.Namespace) -> None:
     lineage_path = result.get("lineage_path", "")
     if lineage_path:
         from pathlib import Path as _Path
+
         lp = _Path(lineage_path)
         if lp.exists():
             lines = lp.read_text(encoding="utf-8").splitlines()
@@ -440,11 +456,14 @@ def build_parser() -> argparse.ArgumentParser:
     # scout
     scout_p = sub.add_parser("scout", help="Profile a source market CSV (SCOUT agent)")
     scout_p.add_argument(
-        "--market", required=True, choices=["uk", "in", "br"],
+        "--market",
+        required=True,
+        choices=["uk", "in", "br"],
         help="Market to profile: uk, in, or br",
     )
     scout_p.add_argument(
-        "--no-llm", action="store_true",
+        "--no-llm",
+        action="store_true",
         help="Skip LLM characterization (stats only, much faster)",
     )
     scout_p.set_defaults(func=cmd_scout)
@@ -452,11 +471,14 @@ def build_parser() -> argparse.ArgumentParser:
     # atlas
     atlas_p = sub.add_parser("atlas", help="Propose column mappings (ATLAS agent)")
     atlas_p.add_argument(
-        "--market", required=True, choices=["uk", "in", "br"],
+        "--market",
+        required=True,
+        choices=["uk", "in", "br"],
         help="Market to map: uk, in, or br",
     )
     atlas_p.add_argument(
-        "--no-llm", action="store_true",
+        "--no-llm",
+        action="store_true",
         help="Skip LLM reasoning (heuristics only, much faster)",
     )
     atlas_p.set_defaults(func=cmd_atlas)
@@ -464,11 +486,14 @@ def build_parser() -> argparse.ArgumentParser:
     # run
     run_p = sub.add_parser("run", help="Full pipeline: Scout → Atlas → human review → finalize")
     run_p.add_argument(
-        "--market", required=True, choices=["uk", "in", "br"],
+        "--market",
+        required=True,
+        choices=["uk", "in", "br"],
         help="Market to process: uk, in, or br",
     )
     run_p.add_argument(
-        "--verbose", action="store_true",
+        "--verbose",
+        action="store_true",
         help="Print agent log at end of run",
     )
     run_p.set_defaults(func=cmd_run)

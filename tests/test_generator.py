@@ -7,9 +7,7 @@ from __future__ import annotations
 
 import csv
 import json
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -25,6 +23,7 @@ from generator import generate  # noqa: E402  (after sys.path patch)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _run(n: int, seed: int, tmp: Path) -> Path:
     """Run generator and return output dir."""
@@ -46,22 +45,26 @@ def _load_gt(out_dir: Path) -> dict:
 # 1. Reproducibility — same seed → identical file bytes
 # ---------------------------------------------------------------------------
 
+
 class TestReproducibility:
     def test_same_seed_identical_bytes(self, tmp_path):
         d1 = tmp_path / "run1"
         d2 = tmp_path / "run2"
-        d1.mkdir(); d2.mkdir()
+        d1.mkdir()
+        d2.mkdir()
         generate(n=200, seed=42, out_dir=d1)
         generate(n=200, seed=42, out_dir=d2)
 
         for fname in ("market_uk.csv", "market_in.csv", "market_br.csv", "ground_truth.json"):
-            assert (d1 / fname).read_bytes() == (d2 / fname).read_bytes(), \
+            assert (d1 / fname).read_bytes() == (d2 / fname).read_bytes(), (
                 f"{fname} differs between runs with same seed"
+            )
 
     def test_different_seeds_differ(self, tmp_path):
         d1 = tmp_path / "s42"
         d2 = tmp_path / "s99"
-        d1.mkdir(); d2.mkdir()
+        d1.mkdir()
+        d2.mkdir()
         generate(n=200, seed=42, out_dir=d1)
         generate(n=200, seed=99, out_dir=d2)
 
@@ -73,6 +76,7 @@ class TestReproducibility:
 # ---------------------------------------------------------------------------
 # 2. Row counts — each CSV should have exactly n rows (header excluded)
 # ---------------------------------------------------------------------------
+
 
 class TestRowCounts:
     @pytest.fixture(scope="class")
@@ -102,6 +106,7 @@ class TestRowCounts:
 # ---------------------------------------------------------------------------
 # 3. Planted-issue rates — within ±0.5 percentage points of target
 # ---------------------------------------------------------------------------
+
 
 class TestPlantedIssueRates:
     N = 1000  # large enough for reliable rate checks
@@ -139,6 +144,7 @@ class TestPlantedIssueRates:
 # 4. ground_truth.json validity — structure + columns reference real headers
 # ---------------------------------------------------------------------------
 
+
 class TestGroundTruth:
     @pytest.fixture(scope="class")
     def data(self, tmp_path_factory):
@@ -156,8 +162,11 @@ class TestGroundTruth:
         _, gt = data
         types = {i["issue_type"] for i in gt["planted_issues"]}
         expected = {
-            "duplicate_sku", "allergen_mismatch",
-            "encoding_glitch", "inconsistent_units", "test_data_poison",
+            "duplicate_sku",
+            "allergen_mismatch",
+            "encoding_glitch",
+            "inconsistent_units",
+            "test_data_poison",
         }
         assert types == expected
 
@@ -176,8 +185,9 @@ class TestGroundTruth:
         for mapping in gt["mappings"]:
             market = mapping["market"]
             col = mapping["source_column"]
-            assert col in market_headers[market], \
+            assert col in market_headers[market], (
                 f"source_column '{col}' not found in {market} CSV headers"
+            )
 
     def test_all_markets_have_mappings(self, data):
         _, gt = data
@@ -193,11 +203,16 @@ class TestGroundTruth:
     def test_no_real_brand_names(self, data):
         out_dir, _ = data
         forbidden = {"dove", "hellmann", "unilever", "loreal", "pantene", "head shoulders"}
-        for fname, delim in [("market_uk.csv", ","), ("market_in.csv", ","), ("market_br.csv", ";")]:
+        for fname, delim in [
+            ("market_uk.csv", ","),
+            ("market_in.csv", ","),
+            ("market_br.csv", ";"),
+        ]:
             rows = _read_csv(out_dir / fname, delim)
             for row in rows:
                 for val in row.values():
                     low = val.lower()
                     for brand in forbidden:
-                        assert brand not in low, \
+                        assert brand not in low, (
                             f"Real brand name '{brand}' found in {fname}: {val!r}"
+                        )

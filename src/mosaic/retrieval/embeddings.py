@@ -24,6 +24,7 @@ def _get_model():
     global _model
     if _model is None:
         from sentence_transformers import SentenceTransformer
+
         _model = SentenceTransformer(_MODEL_NAME)
     return _model
 
@@ -31,6 +32,7 @@ def _get_model():
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def embed_texts(texts: list[str]) -> np.ndarray:
     """Embed a list of strings with BGE-m3.

@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 # Target schema definition (loaded from data/target_schema.yaml)
 # ---------------------------------------------------------------------------
 
+
 class TargetSchemaField(BaseModel):
     """One field in the unified target product master schema."""
 
@@ -30,6 +31,7 @@ class TargetSchemaField(BaseModel):
 # Raw source row (dynamic columns per market)
 # ---------------------------------------------------------------------------
 
+
 class SkuRecord(BaseModel):
     """One row from a source market CSV. Extra columns are allowed and preserved."""
 
@@ -42,6 +44,7 @@ class SkuRecord(BaseModel):
 # ---------------------------------------------------------------------------
 # SCOUT outputs
 # ---------------------------------------------------------------------------
+
 
 class ColumnProfile(BaseModel):
     """Statistical + semantic profile of one source column."""
@@ -78,6 +81,7 @@ class MarketProfile(BaseModel):
 # ATLAS outputs
 # ---------------------------------------------------------------------------
 
+
 class MappingProposal(BaseModel):
     """Proposed mapping from one source column to one target field."""
 
@@ -99,6 +103,7 @@ class MappingProposal(BaseModel):
 # ---------------------------------------------------------------------------
 # SCRIBE outputs
 # ---------------------------------------------------------------------------
+
 
 class LineageRecord(BaseModel):
     """Audit record linking one source SKU row to its harmonized target."""

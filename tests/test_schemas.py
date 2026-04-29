@@ -20,6 +20,7 @@ from mosaic.schemas import (
 # TargetSchemaField
 # ---------------------------------------------------------------------------
 
+
 class TestTargetSchemaField:
     def test_valid(self):
         f = TargetSchemaField(
@@ -53,6 +54,7 @@ class TestTargetSchemaField:
 # SkuRecord
 # ---------------------------------------------------------------------------
 
+
 class TestSkuRecord:
     def test_valid_with_extra_fields(self):
         r = SkuRecord.model_validate(
@@ -69,6 +71,7 @@ class TestSkuRecord:
 # ---------------------------------------------------------------------------
 # ColumnProfile
 # ---------------------------------------------------------------------------
+
 
 class TestColumnProfile:
     def test_valid(self):
@@ -87,35 +90,47 @@ class TestColumnProfile:
     def test_null_rate_above_1_fails(self):
         with pytest.raises(ValidationError):
             ColumnProfile(
-                column_name="x", inferred_dtype="string",
-                null_rate=1.5, unique_count=0,
+                column_name="x",
+                inferred_dtype="string",
+                null_rate=1.5,
+                unique_count=0,
             )
 
     def test_null_rate_below_0_fails(self):
         with pytest.raises(ValidationError):
             ColumnProfile(
-                column_name="x", inferred_dtype="string",
-                null_rate=-0.1, unique_count=0,
+                column_name="x",
+                inferred_dtype="string",
+                null_rate=-0.1,
+                unique_count=0,
             )
 
     def test_value_samples_max_10(self):
         # Exactly 10 is fine
         cp = ColumnProfile(
-            column_name="x", inferred_dtype="string", null_rate=0.0, unique_count=20,
+            column_name="x",
+            inferred_dtype="string",
+            null_rate=0.0,
+            unique_count=20,
             value_samples=[str(i) for i in range(10)],
         )
         assert len(cp.value_samples) == 10
         # 11 items exceeds max_length=10 → ValidationError
         with pytest.raises(ValidationError):
             ColumnProfile(
-                column_name="x", inferred_dtype="string", null_rate=0.0, unique_count=20,
+                column_name="x",
+                inferred_dtype="string",
+                null_rate=0.0,
+                unique_count=20,
                 value_samples=[str(i) for i in range(11)],
             )
 
     def test_json_round_trip(self):
         cp = ColumnProfile(
-            column_name="barcode", inferred_dtype="string",
-            null_rate=0.0, unique_count=5000,
+            column_name="barcode",
+            inferred_dtype="string",
+            null_rate=0.0,
+            unique_count=5000,
             value_samples=["5000112637922"],
         )
         assert ColumnProfile.model_validate_json(cp.model_dump_json()) == cp
@@ -125,11 +140,14 @@ class TestColumnProfile:
 # MarketProfile
 # ---------------------------------------------------------------------------
 
+
 class TestMarketProfile:
     def _make(self) -> MarketProfile:
         col = ColumnProfile(
-            column_name="sku_id", inferred_dtype="string",
-            null_rate=0.0, unique_count=5000,
+            column_name="sku_id",
+            inferred_dtype="string",
+            null_rate=0.0,
+            unique_count=5000,
         )
         return MarketProfile(
             market_id="market_uk",
@@ -148,8 +166,11 @@ class TestMarketProfile:
     def test_negative_row_count_fails(self):
         with pytest.raises(ValidationError):
             MarketProfile(
-                market_id="x", row_count=-1, column_count=0,
-                columns=[], profiling_runtime_seconds=0.0,
+                market_id="x",
+                row_count=-1,
+                column_count=0,
+                columns=[],
+                profiling_runtime_seconds=0.0,
             )
 
     def test_json_round_trip(self):
@@ -160,6 +181,7 @@ class TestMarketProfile:
 # ---------------------------------------------------------------------------
 # MappingProposal
 # ---------------------------------------------------------------------------
+
 
 class TestMappingProposal:
     def test_valid(self):
@@ -176,24 +198,32 @@ class TestMappingProposal:
     def test_confidence_above_1_fails(self):
         with pytest.raises(ValidationError):
             MappingProposal(
-                source_column="x", target_field="y", confidence=1.1,
+                source_column="x",
+                target_field="y",
+                confidence=1.1,
             )
 
     def test_confidence_below_0_fails(self):
         with pytest.raises(ValidationError):
             MappingProposal(
-                source_column="x", target_field="y", confidence=-0.1,
+                source_column="x",
+                target_field="y",
+                confidence=-0.1,
             )
 
     def test_target_field_nullable(self):
         mp = MappingProposal(
-            source_column="unknown_col", target_field=None, confidence=0.1,
+            source_column="unknown_col",
+            target_field=None,
+            confidence=0.1,
         )
         assert mp.target_field is None
 
     def test_json_round_trip(self):
         mp = MappingProposal(
-            source_column="SKU_CD", target_field="sku_id", confidence=0.97,
+            source_column="SKU_CD",
+            target_field="sku_id",
+            confidence=0.97,
             candidate_alternatives=[("barcode", 0.30)],
         )
         assert MappingProposal.model_validate_json(mp.model_dump_json()) == mp
@@ -202,6 +232,7 @@ class TestMappingProposal:
 # ---------------------------------------------------------------------------
 # LineageRecord
 # ---------------------------------------------------------------------------
+
 
 class TestLineageRecord:
     def test_valid(self):
@@ -218,8 +249,11 @@ class TestLineageRecord:
 
     def test_default_timestamp(self):
         lr = LineageRecord(
-            source_sku_id="x", source_market="y", target_sku_id="z",
-            field_lineage={}, agents_involved=[],
+            source_sku_id="x",
+            source_market="y",
+            target_sku_id="z",
+            field_lineage={},
+            agents_involved=[],
         )
         assert isinstance(lr.timestamp, datetime)
 

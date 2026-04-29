@@ -8,7 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from mosaic.agents.scout import profile_market, _infer_dtype, _detect_language, _detect_market_issues
+from mosaic.agents.scout import (
+    profile_market,
+    _infer_dtype,
+    _detect_language,
+    _detect_market_issues,
+)
 from mosaic.schemas import MarketProfile
 
 import pandas as pd
@@ -18,18 +23,22 @@ import pandas as pd
 # Fixtures — tiny synthetic CSVs written to tmp_path
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def clean_csv(tmp_path) -> Path:
     """A small clean CSV with known column types."""
     p = tmp_path / "clean.csv"
-    p.write_text(textwrap.dedent("""\
+    p.write_text(
+        textwrap.dedent("""\
         sku_id,product_name,size_ml,weight_g,launch_date,in_stock
         UK-001,Zephyr Shampoo 250ml,250,300,2022-03-15,true
         UK-002,Luminos Body Wash 500ml,500,550,2021-11-01,false
         UK-003,Vanta Conditioner 400ml,400,420,2023-06-20,true
         UK-004,Oralix Face Wash 150ml,150,180,2022-09-10,false
         UK-005,Purevex Moisturiser 200ml,200,230,2023-01-05,true
-    """), encoding="utf-8")
+    """),
+        encoding="utf-8",
+    )
     return p
 
 
@@ -37,14 +46,17 @@ def clean_csv(tmp_path) -> Path:
 def high_null_csv(tmp_path) -> Path:
     """CSV where one column is >50% null."""
     p = tmp_path / "high_null.csv"
-    p.write_text(textwrap.dedent("""\
+    p.write_text(
+        textwrap.dedent("""\
         sku_id,product_name,allergens
         UK-001,Zephyr Shampoo,
         UK-002,Luminos Wash,
         UK-003,Vanta Gel,
         UK-004,Oralix Cream,milk
         UK-005,Purevex Foam,
-    """), encoding="utf-8")
+    """),
+        encoding="utf-8",
+    )
     return p
 
 
@@ -54,7 +66,7 @@ def mojibake_csv(tmp_path) -> Path:
     p = tmp_path / "mojibake.csv"
     rows = [
         ["sku_id", "nome_produto"],
-        ["BR-001", "ZÃ©phyr ShampÃ´o"],   # mojibake: é → Ã©, ô → Ã´
+        ["BR-001", "ZÃ©phyr ShampÃ´o"],  # mojibake: é → Ã©, ô → Ã´
         ["BR-002", "Luminos Body Wash"],
         ["BR-003", "Vanta CondicionÃ§ador"],
         ["BR-004", "Oralix Creme Facial"],
@@ -69,14 +81,17 @@ def mojibake_csv(tmp_path) -> Path:
 def mixed_lang_csv(tmp_path) -> Path:
     """CSV with Devanagari in one column (simulating market_in PROD_NM)."""
     p = tmp_path / "mixed_lang.csv"
-    p.write_text(textwrap.dedent("""\
+    p.write_text(
+        textwrap.dedent("""\
         SKU_CD,PROD_NM,BRND
         IN001,Zephyr शैम्पू 250ml,Zephyr
         IN002,Luminos साबुन Body Wash,Luminos
         IN003,Vanta क्रीम Moisturiser,Vanta
         IN004,Oralix Face Wash Gel,Oralix
         IN005,Purevex शैम्पू Repair,Purevex
-    """), encoding="utf-8")
+    """),
+        encoding="utf-8",
+    )
     return p
 
 
@@ -84,18 +99,22 @@ def mixed_lang_csv(tmp_path) -> Path:
 def semicolon_csv(tmp_path) -> Path:
     """CSV using semicolon delimiter (simulating market_br)."""
     p = tmp_path / "br.csv"
-    p.write_text(textwrap.dedent("""\
+    p.write_text(
+        textwrap.dedent("""\
         codigo_sku;nome_produto;peso_oz
         BR-001;Zephyr Shampoo;3.53
         BR-002;Luminos Body Wash;7.05
         BR-003;Vanta Conditioner;4.94
-    """), encoding="utf-8")
+    """),
+        encoding="utf-8",
+    )
     return p
 
 
 # ---------------------------------------------------------------------------
 # _infer_dtype unit tests
 # ---------------------------------------------------------------------------
+
 
 class TestInferDtype:
     def test_integer_column(self):
@@ -131,16 +150,20 @@ class TestInferDtype:
 # _detect_language unit tests
 # ---------------------------------------------------------------------------
 
+
 class TestDetectLanguage:
     def test_english_column(self):
         # Use real English sentences — invented brand names confuse langdetect
-        s = pd.Series([
-            "This product moisturises and hydrates dry skin effectively.",
-            "Apply gently to hair and rinse with warm water.",
-            "Suitable for daily use on all skin types.",
-            "Contains natural extracts for a refreshing cleanse.",
-            "Dermatologically tested and approved for sensitive skin.",
-        ] * 4)
+        s = pd.Series(
+            [
+                "This product moisturises and hydrates dry skin effectively.",
+                "Apply gently to hair and rinse with warm water.",
+                "Suitable for daily use on all skin types.",
+                "Contains natural extracts for a refreshing cleanse.",
+                "Dermatologically tested and approved for sensitive skin.",
+            ]
+            * 4
+        )
         lang = _detect_language(s)
         assert lang == "en"
 
@@ -157,36 +180,45 @@ class TestDetectLanguage:
 # _detect_market_issues unit tests
 # ---------------------------------------------------------------------------
 
+
 class TestDetectMarketIssues:
     def test_high_null_detected(self):
-        df = pd.DataFrame({
-            "sku_id": ["A", "B", "C", "D", "E"],
-            "allergens": [None, None, None, None, "milk"],  # 80% null
-        })
+        df = pd.DataFrame(
+            {
+                "sku_id": ["A", "B", "C", "D", "E"],
+                "allergens": [None, None, None, None, "milk"],  # 80% null
+            }
+        )
         issues = _detect_market_issues(df)
         assert any("high_null_rate:allergens" in i for i in issues)
 
     def test_mojibake_detected(self):
-        df = pd.DataFrame({
-            "sku_id": ["BR-001", "BR-002"],
-            "nome_produto": ["ZÃ©phyr ShampÃ´o", "Luminos Wash"],
-        })
+        df = pd.DataFrame(
+            {
+                "sku_id": ["BR-001", "BR-002"],
+                "nome_produto": ["ZÃ©phyr ShampÃ´o", "Luminos Wash"],
+            }
+        )
         issues = _detect_market_issues(df)
         assert any("suspected_mojibake:nome_produto" in i for i in issues)
 
     def test_test_poison_detected(self):
-        df = pd.DataFrame({
-            "sku_id": ["A", "B"],
-            "product_name": ["TEST-Shampoo", "Normal Product"],
-        })
+        df = pd.DataFrame(
+            {
+                "sku_id": ["A", "B"],
+                "product_name": ["TEST-Shampoo", "Normal Product"],
+            }
+        )
         issues = _detect_market_issues(df)
         assert any("test_data_poison" in i for i in issues)
 
     def test_clean_data_no_issues(self):
-        df = pd.DataFrame({
-            "sku_id": ["UK-001", "UK-002"],
-            "product_name": ["Zephyr Shampoo", "Luminos Body Wash"],
-        })
+        df = pd.DataFrame(
+            {
+                "sku_id": ["UK-001", "UK-002"],
+                "product_name": ["Zephyr Shampoo", "Luminos Body Wash"],
+            }
+        )
         issues = _detect_market_issues(df)
         assert issues == []
 
@@ -194,6 +226,7 @@ class TestDetectMarketIssues:
 # ---------------------------------------------------------------------------
 # profile_market integration tests
 # ---------------------------------------------------------------------------
+
 
 class TestProfileMarket:
     def test_returns_market_profile(self, clean_csv):

@@ -13,13 +13,13 @@ from mosaic.retrieval.embeddings import (
     cosine_similarity_matrix,
     embed_column,
     embed_texts,
-    embed_target_field,
 )
 
 
 # ---------------------------------------------------------------------------
 # embed_texts
 # ---------------------------------------------------------------------------
+
 
 class TestEmbedTexts:
     def test_shape(self):
@@ -49,6 +49,7 @@ class TestEmbedTexts:
 # embed_column / embed_target_field
 # ---------------------------------------------------------------------------
 
+
 class TestEmbedColumn:
     def test_shape(self):
         vec = embed_column("product_name", ["Dove Shampoo", "Luminos Wash"])
@@ -67,6 +68,7 @@ class TestEmbedColumn:
 # ---------------------------------------------------------------------------
 # Semantic similarity properties
 # ---------------------------------------------------------------------------
+
 
 class TestSemanticSimilarity:
     """Key property: semantically similar columns score higher than dissimilar ones."""
@@ -109,6 +111,7 @@ class TestSemanticSimilarity:
 # ---------------------------------------------------------------------------
 # cosine_similarity_matrix
 # ---------------------------------------------------------------------------
+
 
 class TestCosineSimilarityMatrix:
     def test_shape(self):

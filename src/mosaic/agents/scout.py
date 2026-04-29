@@ -5,14 +5,10 @@ from __future__ import annotations
 import re
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from mosaic.schemas import ColumnProfile, MarketProfile
-
-if TYPE_CHECKING:
-    pass
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -27,6 +23,7 @@ _SAMPLE_SIZE_FOR_LANGDETECT = 20  # rows sampled for language detection
 # ---------------------------------------------------------------------------
 # Dtype inference
 # ---------------------------------------------------------------------------
+
 
 def _infer_dtype(series: pd.Series) -> str:
     """Infer a Mosaic dtype string from a pandas Series."""
@@ -47,9 +44,9 @@ def _infer_dtype(series: pd.Series) -> str:
 
     # Date heuristic — try common formats
     date_patterns = [
-        r"^\d{4}-\d{2}-\d{2}$",            # ISO 8601
-        r"^\d{2}/\d{2}/\d{2,4}$",          # DD/MM/YY or DD/MM/YYYY
-        r"^\d{2}-\d{2}-\d{4}$",            # DD-MM-YYYY
+        r"^\d{4}-\d{2}-\d{2}$",  # ISO 8601
+        r"^\d{2}/\d{2}/\d{2,4}$",  # DD/MM/YY or DD/MM/YYYY
+        r"^\d{2}-\d{2}-\d{4}$",  # DD-MM-YYYY
     ]
     date_re = re.compile("|".join(date_patterns))
     if sample.str.match(date_re).mean() > 0.8:
@@ -77,6 +74,7 @@ def _infer_dtype(series: pd.Series) -> str:
 # Language detection
 # ---------------------------------------------------------------------------
 
+
 def _is_string_series(series: pd.Series) -> bool:
     """True for object or pandas 3 str dtype columns."""
     return pd.api.types.is_object_dtype(series) or str(series.dtype) in ("str", "string")
@@ -88,7 +86,7 @@ def _detect_language(series: pd.Series) -> str | None:
         return None
 
     try:
-        from langdetect import detect, LangDetectException
+        from langdetect import detect
     except ImportError:
         return None
 
@@ -109,6 +107,7 @@ def _detect_language(series: pd.Series) -> str | None:
 # Data quality checks (market-level)
 # ---------------------------------------------------------------------------
 
+
 def _detect_market_issues(df: pd.DataFrame) -> list[str]:
     issues: list[str] = []
 
@@ -126,9 +125,9 @@ def _detect_market_issues(df: pd.DataFrame) -> list[str]:
     # Test-data poison scan
     poison_count = 0
     for col in df.select_dtypes(include=["object", "str"]).columns:
-        poison_count += df[col].dropna().astype(str).str.contains(
-            _TEST_POISON_PATTERN, regex=True
-        ).sum()
+        poison_count += (
+            df[col].dropna().astype(str).str.contains(_TEST_POISON_PATTERN, regex=True).sum()
+        )
     if poison_count > 0:
         issues.append(f"test_data_poison:{poison_count}_rows")
 
@@ -138,6 +137,7 @@ def _detect_market_issues(df: pd.DataFrame) -> list[str]:
 # ---------------------------------------------------------------------------
 # Core profiling
 # ---------------------------------------------------------------------------
+
 
 def _profile_column(col: str, series: pd.Series) -> ColumnProfile:
     non_null = series.dropna()
@@ -203,6 +203,7 @@ def profile_market(
         if llm_client is None:
             raise ValueError("llm_client must be provided when characterize=True")
         from mosaic.agents._scout_llm import characterize_columns
+
         profile = characterize_columns(profile, llm_client)
 
     return profile

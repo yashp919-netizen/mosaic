@@ -3,7 +3,7 @@
 Returns a MosaicLLMClient for the requested provider — a thin wrapper that
 carries the model name so every call site doesn't have to repeat it.
 
-Day 2: only 'ollama' is implemented. 'gemini' is wired on Day 9.
+Providers: 'ollama' (local, default), 'gemini' (Vertex AI, Day 9).
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ class MosaicLLMClient:
         """Call structured extraction; model is injected automatically."""
         return self._client.chat.completions.create(
             model=self._model,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]  # instructor accepts plain dicts
             response_model=response_model,
             **kwargs,
         )
@@ -35,7 +35,9 @@ class MosaicLLMClient:
         return self._client
 
 
-def get_llm(provider: Literal["ollama", "gemini"] = "ollama", model: str | None = None) -> MosaicLLMClient:
+def get_llm(
+    provider: Literal["ollama", "gemini"] = "ollama", model: str | None = None
+) -> MosaicLLMClient:
     """Return a MosaicLLMClient for the given provider.
 
     Args:
@@ -62,7 +64,7 @@ def _get_ollama_client(model: str) -> MosaicLLMClient:
 
 
 def _get_gemini_client(model: str) -> MosaicLLMClient:
-    # Implemented on Day 9 when the Gemini benchmark is built.
+    # Deferred to v2 — see docs/v2-roadmap.md. Implement in src/mosaic/llm/gemini.py.
     raise NotImplementedError(
-        "Gemini client not yet wired. Implement in src/mosaic/llm/gemini.py on Day 9."
+        "Gemini client not yet implemented. See docs/v2-roadmap.md for the Vertex AI path."
     )

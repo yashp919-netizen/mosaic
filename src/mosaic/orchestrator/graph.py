@@ -20,7 +20,12 @@ import pandas as pd
 
 from mosaic.agents.atlas import load_target_schema, propose_mappings
 from mosaic.agents.scout import profile_market
-from mosaic.agents.scribe import generate_lineage, generate_summary, persist_lineage, persist_summary
+from mosaic.agents.scribe import (
+    generate_lineage,
+    generate_summary,
+    persist_lineage,
+    persist_summary,
+)
 from mosaic.orchestrator.state import MosaicState
 from mosaic.schemas import MappingProposal
 
@@ -28,6 +33,7 @@ from mosaic.schemas import MappingProposal
 # ---------------------------------------------------------------------------
 # Nodes
 # ---------------------------------------------------------------------------
+
 
 def scout_node(state: MosaicState) -> dict[str, Any]:
     """Profile the source CSV and populate state.profile."""
@@ -80,13 +86,15 @@ def human_review_node(state: MosaicState) -> dict[str, Any]:
 
     # interrupt() suspends the graph here and returns the payload to the caller.
     # When resumed, execution continues from the line after interrupt().
-    decisions: dict[str, str | None] = interrupt({
-        "pending_human_review": [p.model_dump() for p in pending],
-        "message": (
-            f"{len(pending)} mapping(s) need human review. "
-            "Resume the graph with human_decisions populated."
-        ),
-    })
+    decisions: dict[str, str | None] = interrupt(
+        {
+            "pending_human_review": [p.model_dump() for p in pending],
+            "message": (
+                f"{len(pending)} mapping(s) need human review. "
+                "Resume the graph with human_decisions populated."
+            ),
+        }
+    )
 
     ts = datetime.datetime.utcnow().isoformat(timespec="seconds")
     log_entry = f"[{ts}] human_review: received decisions for {len(decisions)} columns"
@@ -122,6 +130,7 @@ def scribe_node(state: MosaicState) -> dict[str, Any]:
     executive_summary = ""
     try:
         from mosaic.llm.factory import get_llm
+
         llm_client = get_llm("ollama")
         executive_summary = generate_summary(state, records, llm_client)
     except Exception:
@@ -184,19 +193,27 @@ def finalize_node(state: MosaicState) -> dict[str, Any]:
 
         if decision == p.target_field:
             # Approved as proposed
-            final.append(p.model_copy(update={
-                "reasoning": (p.reasoning + " [human-approved]").strip(),
-            }))
+            final.append(
+                p.model_copy(
+                    update={
+                        "reasoning": (p.reasoning + " [human-approved]").strip(),
+                    }
+                )
+            )
         else:
             # Human chose a different field
-            final.append(p.model_copy(update={
-                "target_field": decision,
-                "reasoning": (
-                    f"Human override: changed from '{p.target_field}' to '{decision}'. "
-                    + p.reasoning
-                ).strip(),
-                "requires_human_approval": False,
-            }))
+            final.append(
+                p.model_copy(
+                    update={
+                        "target_field": decision,
+                        "reasoning": (
+                            f"Human override: changed from '{p.target_field}' to '{decision}'. "
+                            + p.reasoning
+                        ).strip(),
+                        "requires_human_approval": False,
+                    }
+                )
+            )
 
     ts = datetime.datetime.utcnow().isoformat(timespec="seconds")
     auto = len(proposals) - len(human_reviewed_cols)
@@ -216,6 +233,7 @@ def finalize_node(state: MosaicState) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Conditional edge
 # ---------------------------------------------------------------------------
+
 
 def _needs_human_review(state: MosaicState) -> str:
     """Route to human_review if any proposals need it, otherwise skip to finalize."""
