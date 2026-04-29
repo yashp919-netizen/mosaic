@@ -21,9 +21,9 @@ EXPOSE 7860
 ENV MOSAIC_LLM_PROVIDER=none
 ENV PYTHONPATH=/app/src
 
-COPY app.py ./
+COPY app.py ui/app.py
 
-CMD ["streamlit", "run", "app.py", \
+CMD ["streamlit", "run", "ui/app.py", \
      "--server.address", "0.0.0.0", \
      "--server.port", "7860", \
      "--server.headless", "true"]
