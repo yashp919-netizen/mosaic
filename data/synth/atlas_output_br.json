@@ -1,0 +1,155 @@
+[
+  {
+    "source_column": "categoria",
+    "target_field": "category_l1",
+    "confidence": 0.9008,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l2",
+        0.7240391969680786
+      ],
+      [
+        "global_product_name",
+        0.583830714225769
+      ]
+    ]
+  },
+  {
+    "source_column": "marca",
+    "target_field": "brand",
+    "confidence": 0.8901,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "global_product_name",
+        0.5243369340896606
+      ],
+      [
+        "sku_id",
+        0.476967453956604
+      ]
+    ]
+  },
+  {
+    "source_column": "tamanho",
+    "target_field": "size_value",
+    "confidence": 0.8768,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "size_unit",
+        0.676514744758606
+      ],
+      [
+        "weight_grams",
+        0.6081993579864502
+      ]
+    ]
+  },
+  {
+    "source_column": "nome_produto",
+    "target_field": "global_product_name",
+    "confidence": 0.8683,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "brand",
+        0.6634294390678406
+      ],
+      [
+        "category_l2",
+        0.6187589168548584
+      ]
+    ]
+  },
+  {
+    "source_column": "alergenos",
+    "target_field": "allergens",
+    "confidence": 0.861,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "brand",
+        0.5318658351898193
+      ],
+      [
+        "category_l1",
+        0.5179396867752075
+      ]
+    ]
+  },
+  {
+    "source_column": "codigo_sku",
+    "target_field": "sku_id",
+    "confidence": 0.8396,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "barcode",
+        0.599713921546936
+      ],
+      [
+        "brand",
+        0.5502433180809021
+      ]
+    ]
+  },
+  {
+    "source_column": "codigo_barras",
+    "target_field": "barcode",
+    "confidence": 0.8343,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "weight_grams",
+        0.550433874130249
+      ],
+      [
+        "size_value",
+        0.5405147075653076
+      ]
+    ]
+  },
+  {
+    "source_column": "peso_oz",
+    "target_field": "weight_grams",
+    "confidence": 0.8076,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "size_unit",
+        0.5777004957199097
+      ],
+      [
+        "size_value",
+        0.5747882723808289
+      ]
+    ]
+  },
+  {
+    "source_column": "data_lancamento",
+    "target_field": "launch_date",
+    "confidence": 0.7678,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l1",
+        0.4677751958370209
+      ],
+      [
+        "size_value",
+        0.4598332643508911
+      ]
+    ]
+  }
+]

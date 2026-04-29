@@ -1,0 +1,155 @@
+[
+  {
+    "source_column": "EAN",
+    "target_field": "barcode",
+    "confidence": 0.8911,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "weight_grams",
+        0.5871853232383728
+      ],
+      [
+        "size_value",
+        0.5695912837982178
+      ]
+    ]
+  },
+  {
+    "source_column": "ALLRGY",
+    "target_field": "allergens",
+    "confidence": 0.8786,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l1",
+        0.5367896556854248
+      ],
+      [
+        "weight_grams",
+        0.49123379588127136
+      ]
+    ]
+  },
+  {
+    "source_column": "BRND",
+    "target_field": "brand",
+    "confidence": 0.8778,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "global_product_name",
+        0.489073246717453
+      ],
+      [
+        "sku_id",
+        0.46037453413009644
+      ]
+    ]
+  },
+  {
+    "source_column": "SKU_CD",
+    "target_field": "sku_id",
+    "confidence": 0.8442,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "barcode",
+        0.571864902973175
+      ],
+      [
+        "size_value",
+        0.540647029876709
+      ]
+    ]
+  },
+  {
+    "source_column": "PROD_NM",
+    "target_field": "global_product_name",
+    "confidence": 0.835,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "brand",
+        0.6250916123390198
+      ],
+      [
+        "category_l2",
+        0.5919506549835205
+      ]
+    ]
+  },
+  {
+    "source_column": "WT_GMS",
+    "target_field": "weight_grams",
+    "confidence": 0.8158,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "size_value",
+        0.6130229830741882
+      ],
+      [
+        "size_unit",
+        0.5125856995582581
+      ]
+    ]
+  },
+  {
+    "source_column": "SZ",
+    "target_field": "size_value",
+    "confidence": 0.7653,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "size_unit",
+        0.5907666683197021
+      ],
+      [
+        "global_product_name",
+        0.5424147844314575
+      ]
+    ]
+  },
+  {
+    "source_column": "CAT_CD",
+    "target_field": "category_l1",
+    "confidence": 0.7157,
+    "reasoning": "",
+    "requires_human_approval": true,
+    "candidate_alternatives": [
+      [
+        "barcode",
+        0.5461198091506958
+      ],
+      [
+        "sku_id",
+        0.5006868243217468
+      ]
+    ]
+  },
+  {
+    "source_column": "DT_LNCH",
+    "target_field": "launch_date",
+    "confidence": 0.6556,
+    "reasoning": "",
+    "requires_human_approval": true,
+    "candidate_alternatives": [
+      [
+        "category_l1",
+        0.4788779020309448
+      ],
+      [
+        "size_unit",
+        0.4563966989517212
+      ]
+    ]
+  }
+]

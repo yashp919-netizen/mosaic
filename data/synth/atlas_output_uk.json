@@ -1,0 +1,155 @@
+[
+  {
+    "source_column": "sku_id",
+    "target_field": "sku_id",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "barcode",
+        0.5884463787078857
+      ],
+      [
+        "source_market",
+        0.5584763884544373
+      ]
+    ]
+  },
+  {
+    "source_column": "product_name",
+    "target_field": "global_product_name",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "brand",
+        0.6640627384185791
+      ],
+      [
+        "category_l2",
+        0.6149636507034302
+      ]
+    ]
+  },
+  {
+    "source_column": "brand",
+    "target_field": "brand",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "global_product_name",
+        0.5638387203216553
+      ],
+      [
+        "category_l1",
+        0.5060072541236877
+      ]
+    ]
+  },
+  {
+    "source_column": "weight_g",
+    "target_field": "weight_grams",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "size_value",
+        0.6677295565605164
+      ],
+      [
+        "size_unit",
+        0.570405125617981
+      ]
+    ]
+  },
+  {
+    "source_column": "category",
+    "target_field": "category_l1",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l2",
+        0.9029245376586914
+      ],
+      [
+        "global_product_name",
+        0.6452035903930664
+      ]
+    ]
+  },
+  {
+    "source_column": "allergens",
+    "target_field": "allergens",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l1",
+        0.5450904965400696
+      ],
+      [
+        "weight_grams",
+        0.519902229309082
+      ]
+    ]
+  },
+  {
+    "source_column": "barcode",
+    "target_field": "barcode",
+    "confidence": 1.0,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "weight_grams",
+        0.5980088114738464
+      ],
+      [
+        "size_value",
+        0.5919323563575745
+      ]
+    ]
+  },
+  {
+    "source_column": "launch_date",
+    "target_field": "launch_date",
+    "confidence": 0.9439,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l1",
+        0.4786491096019745
+      ],
+      [
+        "brand",
+        0.47640126943588257
+      ]
+    ]
+  },
+  {
+    "source_column": "size_ml",
+    "target_field": "size_value",
+    "confidence": 0.9338,
+    "reasoning": "",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "size_unit",
+        0.6545655727386475
+      ],
+      [
+        "weight_grams",
+        0.6336747407913208
+      ]
+    ]
+  }
+]
