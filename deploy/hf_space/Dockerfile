@@ -19,6 +19,7 @@ RUN python data/synth/generator.py --out-dir data/synth/
 EXPOSE 7860
 
 ENV MOSAIC_LLM_PROVIDER=none
+ENV PYTHONPATH=/app/src
 
 COPY app.py ./
 
