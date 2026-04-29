@@ -1,0 +1,117 @@
+{
+  "market_results": {
+    "market_uk": {
+      "market_id": "market_uk",
+      "mapping": {
+        "true_positives": 9,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "runtime": {
+        "scout_s": 476.37,
+        "atlas_s": 1090.44,
+        "scribe_s": 2.06
+      },
+      "dq_detection": {
+        "duplicate_sku": {
+          "detected": null,
+          "rate": null,
+          "note": "not_detectable_per_market"
+        },
+        "inconsistent_units": {
+          "detected": null,
+          "rate": null,
+          "note": "not_detectable_per_market"
+        },
+        "test_data_poison": {
+          "detected": true,
+          "rate": 1.0
+        }
+      },
+      "scout_profiling_runtime_s": 0.528,
+      "ece": 0.05
+    },
+    "market_in": {
+      "market_id": "market_in",
+      "mapping": {
+        "true_positives": 8,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.8889,
+        "recall": 1.0,
+        "f1": 0.9412
+      },
+      "runtime": {
+        "scout_s": 176.9,
+        "atlas_s": 317.85,
+        "scribe_s": 1.15
+      },
+      "dq_detection": {
+        "duplicate_sku": {
+          "detected": null,
+          "rate": null,
+          "note": "not_detectable_per_market"
+        },
+        "allergen_mismatch": {
+          "detected": null,
+          "rate": null,
+          "note": "not_detectable_per_market"
+        },
+        "test_data_poison": {
+          "detected": true,
+          "rate": 1.0
+        }
+      },
+      "scout_profiling_runtime_s": 0.647,
+      "ece": 0.1944
+    },
+    "market_br": {
+      "market_id": "market_br",
+      "mapping": {
+        "true_positives": 8,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "precision": 0.8889,
+        "recall": 1.0,
+        "f1": 0.9412
+      },
+      "runtime": {
+        "scout_s": 184.33,
+        "atlas_s": 1467.96,
+        "scribe_s": 0.43
+      },
+      "dq_detection": {
+        "duplicate_sku": {
+          "detected": null,
+          "rate": null,
+          "note": "not_detectable_per_market"
+        },
+        "allergen_mismatch": {
+          "detected": null,
+          "rate": null,
+          "note": "not_detectable_per_market"
+        },
+        "encoding_glitch": {
+          "detected": false,
+          "rate": 0.0
+        },
+        "test_data_poison": {
+          "detected": true,
+          "rate": 1.0
+        }
+      },
+      "scout_profiling_runtime_s": 0.915,
+      "ece": 0.15
+    }
+  },
+  "overall_ece": 0.1315,
+  "llm_provider": "ollama",
+  "market_ids": [
+    "market_uk",
+    "market_in",
+    "market_br"
+  ]
+}

@@ -323,8 +323,6 @@ class TestLLMResolveMocked:
         assert "Product names" in reasoning
 
     def test_fill_reasoning_batch_populates_reasoning(self):
-        from mosaic.agents.atlas import AtlasReasoningResponse
-
         col = _make_col("sku_id", ["UK-001", "UK-002"])
         tf = _make_target_field("sku_id", "Unique SKU identifier")
         proposal = MappingProposal(
@@ -336,9 +334,7 @@ class TestLLMResolveMocked:
         )
 
         mock_client = MagicMock()
-        mock_client.create.return_value = AtlasReasoningResponse(
-            reasoning="The values follow a SKU ID pattern consistent with the target."
-        )
+        mock_client.complete.return_value = "The values follow a SKU ID pattern consistent with the target."
 
         result = _fill_reasoning_batch(
             [proposal], {"sku_id": col}, {"sku_id": tf}, mock_client

@@ -311,10 +311,13 @@ def cmd_run(args: argparse.Namespace) -> None:
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
 
+    llm_provider = "" if getattr(args, "no_llm", False) else getattr(args, "llm", "ollama")
+
     initial_state = {
         "market_id": market_id,
         "csv_path": str(csv_path),
         "target_schema": target_schema,
+        "llm_provider": llm_provider,
         "profile": None,
         "proposals": [],
         "pending_human_review": [],
@@ -362,6 +365,15 @@ def cmd_run(args: argparse.Namespace) -> None:
     # ---- Phase 3: Print results ----
     final_mappings = result.get("final_mappings", [])
     proposals = result.get("proposals", [])
+
+    # Persist atlas output so reasoning is inspectable
+    import json as _json
+    _out_dir = Path(__file__).parent.parent.parent / "data" / "synth"
+    _out_dir.mkdir(parents=True, exist_ok=True)
+    (_out_dir / f"atlas_output_{args.market}.json").write_text(
+        _json.dumps([p.model_dump() for p in proposals], indent=2, default=str),
+        encoding="utf-8",
+    )
 
     total = len(proposals)
     reviewed = len(human_decisions)
@@ -490,6 +502,17 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         choices=["uk", "in", "br"],
         help="Market to process: uk, in, or br",
+    )
+    run_p.add_argument(
+        "--llm",
+        default="ollama",
+        choices=["ollama", "gemini"],
+        help="LLM provider (default: ollama)",
+    )
+    run_p.add_argument(
+        "--no-llm",
+        action="store_true",
+        help="Disable LLM — run embeddings + heuristics only",
     )
     run_p.add_argument(
         "--verbose",

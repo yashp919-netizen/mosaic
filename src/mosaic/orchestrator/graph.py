@@ -26,8 +26,17 @@ from mosaic.agents.scribe import (
     persist_lineage,
     persist_summary,
 )
+from mosaic.llm.factory import get_llm
 from mosaic.orchestrator.state import MosaicState
 from mosaic.schemas import MappingProposal
+
+
+def _llm_from_state(state: MosaicState):
+    """Return an LLM client from state["llm_provider"], or None if unset/empty."""
+    provider = state.get("llm_provider", "")
+    if not provider:
+        return None
+    return get_llm(provider)
 
 
 # ---------------------------------------------------------------------------
@@ -39,8 +48,11 @@ def scout_node(state: MosaicState) -> dict[str, Any]:
     """Profile the source CSV and populate state.profile."""
     csv_path = Path(state["csv_path"])
     market_id = state["market_id"]
+    llm_client = _llm_from_state(state)
 
-    profile = profile_market(csv_path, market_id, characterize=False)
+    profile = profile_market(
+        csv_path, market_id, characterize=llm_client is not None, llm_client=llm_client
+    )
 
     ts = datetime.datetime.utcnow().isoformat(timespec="seconds")
     log_entry = f"[{ts}] scout: profiled {market_id} — {profile.row_count} rows, {profile.column_count} cols"
@@ -55,8 +67,9 @@ def atlas_node(state: MosaicState) -> dict[str, Any]:
     """Propose column mappings and split into auto-approved vs pending review."""
     profile = state["profile"]
     target_schema = state.get("target_schema") or load_target_schema()
+    llm_client = _llm_from_state(state)
 
-    proposals = propose_mappings(profile, target_schema, llm_client=None)
+    proposals = propose_mappings(profile, target_schema, llm_client=llm_client)
     pending = [p for p in proposals if p.requires_human_approval]
 
     ts = datetime.datetime.utcnow().isoformat(timespec="seconds")
@@ -114,8 +127,8 @@ def scribe_node(state: MosaicState) -> dict[str, Any]:
     csv_path = Path(state["csv_path"])
     market_id = state["market_id"]
 
-    # BR market uses semicolons; UK and IN use commas
-    sep = ";" if market_id == "market_br" else ","
+    from mosaic.utils import detect_delimiter
+    sep = detect_delimiter(csv_path)
     source_df = pd.read_csv(csv_path, sep=sep, low_memory=False)
 
     # Persist lineage
@@ -126,15 +139,17 @@ def scribe_node(state: MosaicState) -> dict[str, Any]:
     records = generate_lineage(state, source_df)
     lineage_path = persist_lineage(records, synth_dir, short_market)
 
-    # Executive summary — try LLM, fall back to structured plain text
-    executive_summary = ""
-    try:
-        from mosaic.llm.factory import get_llm
+    llm_client = _llm_from_state(state)
 
-        llm_client = get_llm("ollama")
-        executive_summary = generate_summary(state, records, llm_client)
-    except Exception:
-        # LLM unavailable — build a minimal plain-text summary from the run data
+    # Executive summary — use LLM if available, otherwise structured plain text
+    executive_summary = ""
+    if llm_client is not None:
+        try:
+            executive_summary = generate_summary(state, records, llm_client)
+        except Exception:
+            llm_client = None  # fall through to plain-text fallback
+
+    if not executive_summary:
         proposals = state.get("proposals", [])
         final = state.get("final_mappings", [])
         hd = state.get("human_decisions", {})
@@ -146,8 +161,7 @@ def scribe_node(state: MosaicState) -> dict[str, Any]:
             f"{len(source_df):,} source rows processed across {len(proposals)} columns. "
             f"{auto} columns mapped automatically, {reviewed} required human review, "
             f"{rejected} were rejected. "
-            f"{len(final)} final mappings produced. "
-            f"(LLM summary unavailable — Ollama not reachable at generation time.)"
+            f"{len(final)} final mappings produced."
         )
 
     summary_path = persist_summary(executive_summary, synth_dir, short_market)

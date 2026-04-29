@@ -29,6 +29,16 @@ class MosaicLLMClient:
             **kwargs,
         )
 
+    def complete(self, messages: list[dict], **kwargs: Any) -> str:
+        """Raw text completion — no structured output. Returns the assistant message content."""
+        result = self._client.chat.completions.create(
+            model=self._model,
+            messages=messages,  # type: ignore[arg-type]
+            response_model=None,
+            **kwargs,
+        )
+        return result.choices[0].message.content or ""
+
     # Expose the underlying client for callers that need raw access
     @property
     def raw(self) -> instructor.Instructor:

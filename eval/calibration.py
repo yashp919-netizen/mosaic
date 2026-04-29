@@ -28,19 +28,12 @@ _MARKET_CSV = {
     "market_br": _ROOT / "data" / "synth" / "market_br.csv",
 }
 
-# Ground truth uses source-friendly names; the target schema uses canonical names.
-# This map normalises ground-truth target field names to target schema names.
-_GT_TO_CANONICAL: dict[str, str] = {
-    "product_name": "global_product_name",
-    "size_ml": "size_value",
-    "weight_g": "weight_grams",
-    "category": "category_l1",
-    # rest are 1-to-1 (sku_id, brand, allergens, barcode, launch_date)
-}
+sys.path.insert(0, str(_ROOT / "src"))
+from mosaic.eval_utils import GT_TO_CANONICAL, canonicalize_gt_mapping  # noqa: E402
 
 
 def _canonicalise(field: str) -> str:
-    return _GT_TO_CANONICAL.get(field, field)
+    return GT_TO_CANONICAL.get(field, field)
 
 
 # ---------------------------------------------------------------------------
@@ -51,11 +44,10 @@ def _canonicalise(field: str) -> str:
 def _load_ground_truth() -> dict[str, dict[str, str]]:
     """Return {market_id: {source_column: canonical_target_field}}."""
     raw = json.loads(_GT_PATH.read_text(encoding="utf-8"))
-    result: dict[str, dict[str, str]] = defaultdict(dict)
+    raw_by_market: dict[str, dict[str, str]] = defaultdict(dict)
     for entry in raw["mappings"]:
-        market = entry["market"]
-        result[market][entry["source_column"]] = _canonicalise(entry["target_field"])
-    return dict(result)
+        raw_by_market[entry["market"]][entry["source_column"]] = entry["target_field"]
+    return {market: canonicalize_gt_mapping(m) for market, m in raw_by_market.items()}
 
 
 # ---------------------------------------------------------------------------
@@ -81,7 +73,7 @@ _BUCKETS = [(i / 10, (i + 1) / 10) for i in range(10)]  # (0.0,0.1) ... (0.9,1.0
 
 
 def _bucket_label(lo: float, hi: float) -> str:
-    return f"{lo:.1f}–{hi:.1f}"
+    return f"{lo:.1f}-{hi:.1f}"
 
 
 def calibrate(markets: list[str]) -> list[dict]:
@@ -113,13 +105,15 @@ def calibrate(markets: list[str]) -> list[dict]:
         if hi == 1.0:
             in_bucket = [(conf, ok) for conf, ok in pairs if lo <= conf <= hi]
         n = len(in_bucket)
+        midpoint = round(lo + 0.05, 2)
         if n == 0:
-            results.append({"bucket": _bucket_label(lo, hi), "n": 0, "accuracy": None})
+            results.append({"bucket": _bucket_label(lo, hi), "midpoint": midpoint, "n": 0, "accuracy": None})
         else:
             accuracy = sum(ok for _, ok in in_bucket) / n
             results.append(
                 {
                     "bucket": _bucket_label(lo, hi),
+                    "midpoint": midpoint,
                     "n": n,
                     "accuracy": round(accuracy, 4),
                 }
@@ -135,13 +129,13 @@ def calibrate(markets: list[str]) -> list[dict]:
 def _print_table(rows: list[dict], markets: list[str]) -> None:
     header = f"{'Confidence bucket':<20} {'N':>5}  {'Actual accuracy':>16}"
     sep = "-" * len(header)
-    print(f"\nCalibration sanity check — markets: {', '.join(markets)}")
+    print(f"\nCalibration sanity check | markets: {', '.join(markets)}")
     print(sep)
     print(header)
     print(sep)
     for r in rows:
         if r["n"] == 0:
-            acc_str = "     —"
+            acc_str = "     n/a"
         else:
             acc_str = f"{r['accuracy']:.4f}"
         print(f"{r['bucket']:<20} {r['n']:>5}  {acc_str:>16}")
@@ -154,19 +148,19 @@ def _print_table(rows: list[dict], markets: list[str]) -> None:
         overall_acc = sum(r["accuracy"] * r["n"] for r in filled) / total_n
         print(f"\nOverall accuracy (weighted): {overall_acc:.4f}  |  Total proposals: {total_n}")
 
-    # Calibration quality note
-    miscalibrated = [
-        r for r in filled if abs(r["accuracy"] - float(r["bucket"].split("–")[0]) - 0.05) > 0.20
-    ]
-    if miscalibrated:
-        print(
-            "\nNote: Some buckets appear miscalibrated "
-            f"({len(miscalibrated)} of {len(filled)} non-empty buckets have "
-            ">20% gap from diagonal). This is expected without LLM; "
-            "Day 8 adds full calibration with ECE."
-        )
+    # ECE — weighted average of |actual_accuracy - bucket_midpoint|
+    ece_num = sum(
+        abs(r["accuracy"] - r["midpoint"]) * r["n"]
+        for r in filled
+    )
+    ece = ece_num / total_n if total_n else float("nan")
+    print(f"ECE (Expected Calibration Error):  {ece:.4f}")
+    if ece < 0.10:
+        print("  Calibration is acceptable for v1 (ECE < 0.10).")
+    elif ece < 0.15:
+        print("  Calibration is borderline (0.10 <= ECE < 0.15). Monitor in Week 2.")
     else:
-        print("\nCalibration looks reasonable for a heuristic-only run.")
+        print("  Calibration problem (ECE >= 0.15). Revisit confidence scoring in Week 2.")
 
 
 # ---------------------------------------------------------------------------

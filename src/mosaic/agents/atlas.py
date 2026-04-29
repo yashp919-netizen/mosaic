@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]  # types-PyYAML not in dev deps
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from mosaic.prompts.loader import load_prompt
 from mosaic.retrieval.embeddings import (
@@ -56,6 +56,18 @@ class AtlasReasoningResponse(BaseModel):
     """Structured LLM output for reasoning-only (unambiguous case)."""
 
     reasoning: str
+
+    @field_validator("reasoning", mode="before")
+    @classmethod
+    def coerce_to_str(cls, v: object) -> str:
+        if isinstance(v, str):
+            return v
+        if isinstance(v, dict):
+            # llama3.2 sometimes returns {"label": "..."} — extract any string value
+            for val in v.values():
+                if isinstance(val, str) and val:
+                    return val
+        return str(v)
 
 
 # ---------------------------------------------------------------------------
@@ -231,12 +243,14 @@ def _fill_reasoning_batch(
             target_field_examples=", ".join(tf.example_values[:3]),
         )
 
-        response: AtlasReasoningResponse = llm_client.create(
-            response_model=AtlasReasoningResponse,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        try:
+            reasoning = llm_client.complete(
+                messages=[{"role": "user", "content": prompt}]
+            ).strip()
+        except Exception as exc:  # noqa: BLE001
+            reasoning = f"[LLM reasoning failed: {exc!s:.120}]"
 
-        updated.append(p.model_copy(update={"reasoning": response.reasoning}))
+        updated.append(p.model_copy(update={"reasoning": reasoning}))
 
     return updated
 

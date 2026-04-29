@@ -178,10 +178,8 @@ def profile_market(
     """
     t0 = time.perf_counter()
 
-    # Detect delimiter
-    with open(csv_path, encoding="utf-8", errors="replace") as f:
-        first_line = f.readline()
-    delimiter = ";" if first_line.count(";") > first_line.count(",") else ","
+    from mosaic.utils import detect_delimiter
+    delimiter = detect_delimiter(csv_path)
 
     df = pd.read_csv(csv_path, delimiter=delimiter, dtype=str, keep_default_na=True)
 

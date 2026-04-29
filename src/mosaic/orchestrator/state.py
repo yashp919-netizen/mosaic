@@ -21,6 +21,7 @@ class MosaicState(TypedDict):
     market_id: str
     csv_path: str
     target_schema: list[TargetSchemaField]
+    llm_provider: str  # "ollama" | "gemini" | "" (empty = no LLM)
 
     # SCOUT output
     profile: MarketProfile | None
