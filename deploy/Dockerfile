@@ -16,7 +16,7 @@ COPY data/ data/
 
 # Pre-generate synthetic data with default seed 42 so the image is self-contained.
 # CSVs are reproducible — override by mounting a volume over /app/data/synth/.
-RUN uv run python data/synth/generator.py --output-dir data/synth/
+RUN uv run python data/synth/generator.py --out-dir data/synth/
 
 EXPOSE 8501
 

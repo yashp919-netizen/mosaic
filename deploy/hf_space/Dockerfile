@@ -13,7 +13,7 @@ COPY src/ src/
 COPY data/ data/
 
 # Generate synthetic data (seed 42, deterministic)
-RUN python data/synth/generator.py --output-dir data/synth/
+RUN python data/synth/generator.py --out-dir data/synth/
 
 # HuggingFace Docker Spaces use port 7860
 EXPOSE 7860
