@@ -146,6 +146,7 @@ def _run_market_pipeline(market_id: str, llm_provider: str) -> dict:
         "scout_time": scout_time,
         "atlas_time": atlas_time,
         "scribe_time": scribe_time,
+        "token_count": llm_client.token_count if llm_client else 0,
     }
 
 
@@ -293,6 +294,7 @@ def run_full_eval(market_ids: list[str], llm_provider: str = "ollama") -> dict:
             },
             "dq_detection": dq,
             "scout_profiling_runtime_s": run["profile"].profiling_runtime_seconds,
+            "token_count": run.get("token_count", 0),
         }
 
         print(
@@ -310,11 +312,13 @@ def run_full_eval(market_ids: list[str], llm_provider: str = "ollama") -> dict:
     for market_id in market_ids:
         market_results[market_id]["ece"] = ece.get(market_id, float("nan"))
 
+    total_tokens = sum(market_results[m].get("token_count", 0) for m in market_ids)
     results = {
         "market_results": market_results,
         "overall_ece": ece.get("overall", float("nan")),
         "llm_provider": llm_provider,
         "market_ids": market_ids,
+        "total_tokens": total_tokens,
     }
 
     # Save raw results

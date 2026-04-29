@@ -23,9 +23,11 @@ dependencies = [
     "faker>=25.0",
     "langdetect>=1.0",
     "google-cloud-aiplatform>=1.50",
+    "google-generativeai>=0.8",
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
     "rich>=13.0",
+    "google-genai>=1.73.1",
 ]
 
 [project.optional-dependencies]

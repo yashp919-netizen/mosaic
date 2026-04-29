@@ -39,6 +39,11 @@ class MosaicLLMClient:
         )
         return result.choices[0].message.content or ""
 
+    @property
+    def token_count(self) -> int:
+        """Total tokens processed; only non-zero for providers that track usage (e.g. Gemini)."""
+        return getattr(self._client, "token_count", 0)
+
     # Expose the underlying client for callers that need raw access
     @property
     def raw(self) -> instructor.Instructor:
@@ -57,7 +62,7 @@ def get_llm(
     if provider == "ollama":
         return _get_ollama_client(model or "llama3.2:latest")
     if provider == "gemini":
-        return _get_gemini_client(model or "gemini-2.0-flash")
+        return _get_gemini_client(model or "gemini-2.5-flash")
     raise ValueError(f"Unknown LLM provider: {provider!r}. Choose 'ollama' or 'gemini'.")
 
 
@@ -74,7 +79,6 @@ def _get_ollama_client(model: str) -> MosaicLLMClient:
 
 
 def _get_gemini_client(model: str) -> MosaicLLMClient:
-    # Deferred to v2 — see docs/v2-roadmap.md. Implement in src/mosaic/llm/gemini.py.
-    raise NotImplementedError(
-        "Gemini client not yet implemented. See docs/v2-roadmap.md for the Vertex AI path."
-    )
+    from mosaic.llm.gemini import get_gemini_shim
+    shim = get_gemini_shim(model)
+    return MosaicLLMClient(shim, model)

@@ -3,7 +3,7 @@
     "source_column": "sku_id",
     "target_field": "sku_id",
     "confidence": 1.0,
-    "reasoning": "",
+    "reasoning": "This mapping appears to be correct because the source column contains SKU IDs that are standardized with a specific format (UK- followed by four digits), which matches the target field's requirement for unique product identifiers. The language specification within the source values, such as \"uk\" and \"br\", aligns with the business practice of categorizing items across different languages. This consistent format also allows for straightforward matching in the target system, simplifying data migration and integration processes.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -20,7 +20,7 @@
     "source_column": "product_name",
     "target_field": "global_product_name",
     "confidence": 1.0,
-    "reasoning": "",
+    "reasoning": "The mapping from the source column to the global_product_name field was accurately chosen because it groups related concepts together with 'Luminos', reflecting their consistent brand names across different product types (e.g., tomato ketchup, repair shampoo). This consistency in branding is crucial for providing a uniform customer experience, and standardizing product names achieves this. By canonicalizing these display names, businesses enhance the overall coherence of their online presence.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -37,7 +37,7 @@
     "source_column": "brand",
     "target_field": "brand",
     "confidence": 1.0,
-    "reasoning": "",
+    "reasoning": "This mapping is correct because the source column contains actual brand names of consumer packaged goods (CPG) products that match the target field's expected format. For instance, both \"Luminos\" and \"Zephyr\" appear to be legitimate product brands, reinforcing the accuracy of the mapping. This matching pattern suggests that the business intent behind the branding elements in the source column is indeed represented by the brand names listed in the target field.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -54,7 +54,7 @@
     "source_column": "weight_g",
     "target_field": "weight_grams",
     "confidence": 1.0,
-    "reasoning": "",
+    "reasoning": "The confident mapping of the source column to the target field, \"weight_grams,\" is based on the consistent pattern of numerical values and the business context that suggests a weight measurement in grams. The inclusion of decimal points in the example values (e.g., 500.0) further reinforces this assumption, as it is typical for units such as grams to be expressed with precision to tenths or hundredths of an unit. As weights are commonly measured in grams in packaging and product management industries, this mapping provides a realistic representation of the field's intended meaning and data type.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -68,27 +68,10 @@
     ]
   },
   {
-    "source_column": "category",
-    "target_field": "category_l1",
-    "confidence": 1.0,
-    "reasoning": "",
-    "requires_human_approval": false,
-    "candidate_alternatives": [
-      [
-        "category_l2",
-        0.9029245376586914
-      ],
-      [
-        "global_product_name",
-        0.6452035903930664
-      ]
-    ]
-  },
-  {
     "source_column": "allergens",
     "target_field": "allergens",
     "confidence": 1.0,
-    "reasoning": "",
+    "reasoning": "The source column has been correctly mapped to the target field because its sample values accurately reflect a list of allergens in an organized format, mirroring the comma-separated list expected in regulatory standards such as food labels or safety guides. This ensures that key allergy information is conveyed effectively for consumer awareness and compliance with dietary regulations. The consistency in formatting supports a clear representation of potential allergenic ingredients across multiple products.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -105,7 +88,7 @@
     "source_column": "barcode",
     "target_field": "barcode",
     "confidence": 1.0,
-    "reasoning": "",
+    "reasoning": "This mapping is correct because all sample values are 13-digit numeric strings that resemble a Universal Product Code (UPC) barcode format, indicating they represent unique product SKUs in a retail setting. Given the business description's emphasis on using these barcodes for identification purposes, it is likely that this data type was accurately represented by a numeric string without any additional characters or formatting. This consistent pattern further supports the confidence in the mapping from source to target field.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -119,10 +102,27 @@
     ]
   },
   {
+    "source_column": "category",
+    "target_field": "category_l1",
+    "confidence": 0.97,
+    "reasoning": "I've chosen category_l1 as the best mapping for the 'category' source column because it represents a top-level product category (e.g., Personal Care, Household) that closely aligns with the business meaning of this column. Category_l2 seems like a plausible alternative, but it's too granular and less informative since categories like Body Wash and Shampoo were both present in separate rows in our sample data set. In contrast, choosing category_l1 strikes a better balance between categorization and generality, making the confidence level 0.95 and thus justifying this decision over the others.",
+    "requires_human_approval": false,
+    "candidate_alternatives": [
+      [
+        "category_l2",
+        0.9029245376586914
+      ],
+      [
+        "global_product_name",
+        0.6452035903930664
+      ]
+    ]
+  },
+  {
     "source_column": "launch_date",
     "target_field": "launch_date",
     "confidence": 0.9439,
-    "reasoning": "",
+    "reasoning": "The source column's mapping to the target field is correct because the date format in both sources aligns with a standard ISO 8601 notation for representing specific dates, which can be easily identified by date values in the same format. The sample values demonstrate this consistency across all records, implying that each value corresponds to a product launch date. This matching pattern supports the conclusion that the source column's data was accurately mapped to support the business meaning of product availability or release date.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [
@@ -139,7 +139,7 @@
     "source_column": "size_ml",
     "target_field": "size_value",
     "confidence": 0.9338,
-    "reasoning": "",
+    "reasoning": "Since all samples have been consistently mapped to their corresponding target value, it can be inferred that the mapping is accurate as there is no apparent error or discrepancy among the values provided. Given the business context of wholesale unit sizes for CPG products, the source values representing sizes in milliliters directly translate to the target values which represent a more basic numeric quantity or volume without specifying units, further supporting the correctness of this mapping.",
     "requires_human_approval": false,
     "candidate_alternatives": [
       [

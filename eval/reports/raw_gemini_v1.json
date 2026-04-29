@@ -11,9 +11,9 @@
         "f1": 1.0
       },
       "runtime": {
-        "scout_s": 476.37,
-        "atlas_s": 1090.44,
-        "scribe_s": 2.06
+        "scout_s": 28.13,
+        "atlas_s": 35.84,
+        "scribe_s": 0.18
       },
       "dq_detection": {
         "duplicate_sku": {
@@ -31,23 +31,24 @@
           "rate": 1.0
         }
       },
-      "scout_profiling_runtime_s": 0.528,
+      "scout_profiling_runtime_s": 0.658,
+      "token_count": 0,
       "ece": 0.05
     },
     "market_in": {
       "market_id": "market_in",
       "mapping": {
-        "true_positives": 8,
-        "false_positives": 1,
+        "true_positives": 9,
+        "false_positives": 0,
         "false_negatives": 0,
-        "precision": 0.8889,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.9412
+        "f1": 1.0
       },
       "runtime": {
-        "scout_s": 176.9,
-        "atlas_s": 317.85,
-        "scribe_s": 1.15
+        "scout_s": 3.49,
+        "atlas_s": 8.35,
+        "scribe_s": 0.18
       },
       "dq_detection": {
         "duplicate_sku": {
@@ -65,23 +66,24 @@
           "rate": 1.0
         }
       },
-      "scout_profiling_runtime_s": 0.647,
+      "scout_profiling_runtime_s": 0.098,
+      "token_count": 0,
       "ece": 0.1944
     },
     "market_br": {
       "market_id": "market_br",
       "mapping": {
-        "true_positives": 8,
-        "false_positives": 1,
+        "true_positives": 9,
+        "false_positives": 0,
         "false_negatives": 0,
-        "precision": 0.8889,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.9412
+        "f1": 1.0
       },
       "runtime": {
-        "scout_s": 184.33,
-        "atlas_s": 1467.96,
-        "scribe_s": 0.43
+        "scout_s": 3.86,
+        "atlas_s": 21.91,
+        "scribe_s": 0.2
       },
       "dq_detection": {
         "duplicate_sku": {
@@ -103,15 +105,17 @@
           "rate": 1.0
         }
       },
-      "scout_profiling_runtime_s": 0.915,
+      "scout_profiling_runtime_s": 0.095,
+      "token_count": 0,
       "ece": 0.15
     }
   },
   "overall_ece": 0.1315,
-  "llm_provider": "ollama",
+  "llm_provider": "gemini",
   "market_ids": [
     "market_uk",
     "market_in",
     "market_br"
-  ]
+  ],
+  "total_tokens": 0
 }

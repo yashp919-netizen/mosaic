@@ -1,3 +1,3 @@
 # Mosaic Executive Summary — UK
 
-The recent Mosaic pipeline run has resulted in a significant migration of data from various markets, with 5000 rows of data transferred across 9 columns.
+Mosaic pipeline completed for market UK. 5,000 source rows processed across 9 columns. 9 columns mapped automatically, 0 required human review, 0 were rejected. 9 final mappings produced.
