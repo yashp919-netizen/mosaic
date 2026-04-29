@@ -1,0 +1,16 @@
+langgraph>=0.2
+langchain>=0.3
+langchain-community>=0.3
+sentence-transformers>=3.0
+faiss-cpu>=1.8
+instructor>=1.0
+pydantic>=2.0
+pandas>=2.2
+faker>=25.0
+langdetect>=1.0
+google-generativeai>=0.8
+google-genai>=1.73.1
+python-dotenv>=1.0
+pyyaml>=6.0
+rich>=13.0
+streamlit>=1.35

@@ -79,6 +79,13 @@ streamlit run ui/streamlit_app.py       # Streamlit UI (all three markets)
 
 No API keys needed for the local path. For Gemini: copy `.env.example` to `.env` and set `GEMINI_API_KEY`.
 
+**Docker (heuristics only — no Ollama required):**
+```bash
+cd deploy && docker compose up        # builds image, starts mosaic on :8501
+```
+The demo image defaults to `MOSAIC_LLM_PROVIDER=none` (embedding + heuristics only, no LLM calls).
+For the full Ollama pipeline, the compose file sets `MOSAIC_LLM_PROVIDER=ollama` and starts an Ollama sidecar — the first run pulls `llama3.2:latest` into a Docker volume.
+
 ---
 
 ## Evaluation

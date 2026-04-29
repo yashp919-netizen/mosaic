@@ -1,7 +1,31 @@
-# Stub — implementation on Day 13
-version: "3.9"
 services:
   mosaic:
-    build: .
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
     ports:
-      - "8000:8000"
+      - "8501:8501"
+    environment:
+      # Set to "ollama" to use the local LLM sidecar below.
+      # Set to "gemini" and provide GEMINI_API_KEY to use the cloud LLM.
+      - MOSAIC_LLM_PROVIDER=ollama
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    # Pull the model on first start. Remove this command after the model is cached.
+    # Subsequent starts skip the pull (model is in the volume).
+    entrypoint: >
+      sh -c "ollama serve &
+             sleep 5 &&
+             ollama pull llama3.2:latest &&
+             wait"
+
+volumes:
+  ollama_models:

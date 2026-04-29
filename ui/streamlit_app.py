@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -30,6 +31,11 @@ LLM_PROVIDER_MAP = {
     "Cloud (Gemini)": "gemini",
     "No LLM (heuristics only)": "",
 }
+# Map MOSAIC_LLM_PROVIDER env var → default radio index
+_ENV_LLM_INDEX = {"ollama": 0, "gemini": 1, "none": 2, "": 2}
+_DEFAULT_LLM_INDEX = _ENV_LLM_INDEX.get(
+    os.environ.get("MOSAIC_LLM_PROVIDER", "").lower(), 2
+)
 
 # ---------------------------------------------------------------------------
 # Page config
@@ -134,7 +140,7 @@ def _render_sidebar() -> tuple[str, str, bool]:
 
         market = st.radio("**Market**", MARKET_OPTIONS, index=0)
         st.divider()
-        llm_option = st.radio("**LLM Provider**", LLM_OPTIONS, index=2)
+        llm_option = st.radio("**LLM Provider**", LLM_OPTIONS, index=_DEFAULT_LLM_INDEX)
         st.divider()
 
         run_clicked = st.button(
