@@ -50,8 +50,15 @@ def scout_node(state: MosaicState) -> dict[str, Any]:
     market_id = state["market_id"]
     llm_client = _llm_from_state(state)
 
+    # Gemini free tier allows 15 req/min — delay 5s between Scout LLM calls
+    rate_limit_delay = 5.0 if state.get("llm_provider") == "gemini" else 0.0
+
     profile = profile_market(
-        csv_path, market_id, characterize=llm_client is not None, llm_client=llm_client
+        csv_path,
+        market_id,
+        characterize=llm_client is not None,
+        llm_client=llm_client,
+        rate_limit_delay=rate_limit_delay,
     )
 
     ts = datetime.datetime.utcnow().isoformat(timespec="seconds")

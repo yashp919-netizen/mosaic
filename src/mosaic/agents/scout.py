@@ -166,6 +166,7 @@ def profile_market(
     *,
     characterize: bool = False,
     llm_client=None,
+    rate_limit_delay: float = 0.0,
 ) -> MarketProfile:
     """Profile a source market CSV and return a MarketProfile.
 
@@ -202,6 +203,6 @@ def profile_market(
             raise ValueError("llm_client must be provided when characterize=True")
         from mosaic.agents._scout_llm import characterize_columns
 
-        profile = characterize_columns(profile, llm_client)
+        profile = characterize_columns(profile, llm_client, rate_limit_delay=rate_limit_delay)
 
     return profile

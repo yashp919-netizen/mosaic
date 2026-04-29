@@ -93,11 +93,19 @@ def _load_prompt(col: ColumnProfile) -> str:
 # ---------------------------------------------------------------------------
 
 
-def characterize_columns(profile: MarketProfile, llm_client) -> MarketProfile:
+def characterize_columns(
+    profile: MarketProfile,
+    llm_client,
+    rate_limit_delay: float = 0.0,
+) -> MarketProfile:
     """Fill llm_description and data_quality_flags for each column in profile.
 
     Returns a new MarketProfile with the characterization fields populated.
+    rate_limit_delay: seconds to sleep after each LLM call. Set to 5.0 for
+    Gemini free-tier (15 req/min) to avoid 429 RESOURCE_EXHAUSTED errors.
     """
+    import time
+
     updated_columns: list[ColumnProfile] = []
 
     for col in profile.columns:
@@ -124,5 +132,8 @@ def characterize_columns(profile: MarketProfile, llm_client) -> MarketProfile:
             )
 
         updated_columns.append(updated_col)
+
+        if rate_limit_delay > 0:
+            time.sleep(rate_limit_delay)
 
     return profile.model_copy(update={"columns": updated_columns})
