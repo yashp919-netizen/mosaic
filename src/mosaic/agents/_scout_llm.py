@@ -5,6 +5,7 @@ Separated from scout.py to keep the stats layer importable without an LLM client
 
 from __future__ import annotations
 
+import time
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -108,10 +109,13 @@ def characterize_columns(
 
     updated_columns: list[ColumnProfile] = []
 
+    from mosaic.utils import llm_call_with_retry
+
     for col in profile.columns:
         prompt = _load_prompt(col)
         try:
-            result: ColumnCharacterization = llm_client.create(
+            result: ColumnCharacterization = llm_call_with_retry(
+                llm_client.create,
                 messages=[{"role": "user", "content": prompt}],
                 response_model=ColumnCharacterization,
             )

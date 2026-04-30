@@ -205,7 +205,10 @@ def llm_resolve_ambiguous(
         candidates=candidates_text,
     )
 
-    response: AtlasResolutionResponse = llm_client.create(
+    from mosaic.utils import llm_call_with_retry
+
+    response: AtlasResolutionResponse = llm_call_with_retry(
+        llm_client.create,
         response_model=AtlasResolutionResponse,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -247,8 +250,11 @@ def _fill_reasoning_batch(
         )
 
         try:
-            reasoning = llm_client.complete(
-                messages=[{"role": "user", "content": prompt}]
+            from mosaic.utils import llm_call_with_retry
+
+            reasoning = llm_call_with_retry(
+                llm_client.complete,
+                messages=[{"role": "user", "content": prompt}],
             ).strip()
         except Exception as exc:  # noqa: BLE001
             reasoning = f"[LLM reasoning failed: {exc!s:.120}]"
