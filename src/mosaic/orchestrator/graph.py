@@ -76,7 +76,10 @@ def atlas_node(state: MosaicState) -> dict[str, Any]:
     target_schema = state.get("target_schema") or load_target_schema()
     llm_client = _llm_from_state(state)
 
-    proposals = propose_mappings(profile, target_schema, llm_client=llm_client)
+    rate_limit_delay = 5.0 if state.get("llm_provider") == "gemini" else 0.0
+    proposals = propose_mappings(
+        profile, target_schema, llm_client=llm_client, rate_limit_delay=rate_limit_delay
+    )
     pending = [p for p in proposals if p.requires_human_approval]
 
     ts = datetime.datetime.utcnow().isoformat(timespec="seconds")

@@ -219,12 +219,15 @@ def _fill_reasoning_batch(
     col_map: dict[str, ColumnProfile],
     target_fields: dict[str, TargetSchemaField],
     llm_client: MosaicLLMClient,
+    rate_limit_delay: float = 0.0,
 ) -> list[MappingProposal]:
     """Fill in reasoning for unambiguous proposals without changing their confidence.
 
     Runs each call sequentially ("batch" here means we isolate and group them
     before calling, rather than interleaving with resolution calls).
     """
+    import time
+
     updated = []
     for p in proposals:
         col = col_map[p.source_column]
@@ -252,6 +255,9 @@ def _fill_reasoning_batch(
 
         updated.append(p.model_copy(update={"reasoning": reasoning}))
 
+        if rate_limit_delay > 0:
+            time.sleep(rate_limit_delay)
+
     return updated
 
 
@@ -264,6 +270,7 @@ def propose_mappings(
     market_profile: MarketProfile,
     target_schema: list[TargetSchemaField] | None = None,
     llm_client: MosaicLLMClient | None = None,
+    rate_limit_delay: float = 0.0,
 ) -> list[MappingProposal]:
     """Propose source-to-target column mappings for one market.
 
@@ -292,6 +299,8 @@ def propose_mappings(
         all_candidates_map[col.column_name] = all_candidates
 
     if llm_client is not None:
+        import time
+
         col_map = {col.column_name: col for col in market_profile.columns}
         ambiguous_indices = [i for i, p in enumerate(proposals) if _is_ambiguous(p)]
         unambiguous_indices = [i for i, p in enumerate(proposals) if not _is_ambiguous(p)]
@@ -320,14 +329,18 @@ def propose_mappings(
                         }
                     )
             except Exception as exc:  # noqa: BLE001
-                # LLM call failed — keep heuristic result, leave reasoning empty
                 proposals[i] = proposals[i].model_copy(
                     update={"reasoning": f"[LLM resolution failed: {exc}]"}
                 )
 
+            if rate_limit_delay > 0:
+                time.sleep(rate_limit_delay)
+
         # Fill reasoning for unambiguous cases in batch
         unambiguous = [proposals[i] for i in unambiguous_indices]
-        filled = _fill_reasoning_batch(unambiguous, col_map, target_fields_dict, llm_client)
+        filled = _fill_reasoning_batch(
+            unambiguous, col_map, target_fields_dict, llm_client, rate_limit_delay
+        )
         for idx, i in enumerate(unambiguous_indices):
             proposals[i] = filled[idx]
 
