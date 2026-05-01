@@ -25,17 +25,42 @@ MARKET_OPTIONS = ["UK", "India", "Brazil"]
 MARKET_ID_MAP = {"UK": "market_uk", "India": "market_in", "Brazil": "market_br"}
 MARKET_KEY_MAP = {"UK": "uk", "India": "in", "Brazil": "br"}
 
-LLM_OPTIONS = ["Local (Ollama)", "Cloud (Gemini)", "No LLM (heuristics only)"]
 LLM_PROVIDER_MAP = {
     "Local (Ollama)": "ollama",
     "Cloud (Gemini)": "gemini",
     "No LLM (heuristics only)": "",
 }
-# Map MOSAIC_LLM_PROVIDER env var → default radio index
-_ENV_LLM_INDEX = {"ollama": 0, "gemini": 1, "none": 2, "": 2}
-_DEFAULT_LLM_INDEX = _ENV_LLM_INDEX.get(
-    os.environ.get("MOSAIC_LLM_PROVIDER", "").lower(), 2
+
+
+def _ollama_available() -> bool:
+    """Return True if an Ollama server is reachable at localhost:11434."""
+    import socket
+    try:
+        with socket.create_connection(("localhost", 11434), timeout=1):
+            return True
+    except OSError:
+        return False
+
+
+# Build the LLM options list at startup — hide Ollama if not reachable
+_OLLAMA_UP = _ollama_available()
+LLM_OPTIONS = (
+    ["Local (Ollama)", "Cloud (Gemini)", "No LLM (heuristics only)"]
+    if _OLLAMA_UP
+    else ["Cloud (Gemini)", "No LLM (heuristics only)"]
 )
+
+# Map MOSAIC_LLM_PROVIDER env var → default radio index
+_env_provider = os.environ.get("MOSAIC_LLM_PROVIDER", "").lower()
+if _env_provider == "ollama" and not _OLLAMA_UP:
+    _env_provider = "none"  # fall back if Ollama not available
+_ENV_LLM_INDEX = {
+    "ollama": 0 if _OLLAMA_UP else 1,
+    "gemini": 1 if _OLLAMA_UP else 0,
+    "none": 2 if _OLLAMA_UP else 1,
+    "": 2 if _OLLAMA_UP else 1,
+}
+_DEFAULT_LLM_INDEX = _ENV_LLM_INDEX.get(_env_provider, len(LLM_OPTIONS) - 1)
 
 # ---------------------------------------------------------------------------
 # Page config
@@ -141,6 +166,8 @@ def _render_sidebar() -> tuple[str, str, bool]:
         market = st.radio("**Market**", MARKET_OPTIONS, index=0)
         st.divider()
         llm_option = st.radio("**LLM Provider**", LLM_OPTIONS, index=_DEFAULT_LLM_INDEX)
+        if not _OLLAMA_UP:
+            st.caption("Local (Ollama) unavailable — no Ollama server detected. Run locally to use it.")
         st.divider()
 
         run_clicked = st.button(
